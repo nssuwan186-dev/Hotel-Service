@@ -1,103 +1,123 @@
-
 import React, { useState, useMemo } from 'react';
 import { AdminBooking, Room } from '../../types';
 import { formatISODate } from '../../services/utils';
 
-const RoomsView: React.FC<{ rooms: Room[], bookings: AdminBooking[] }> = ({ rooms, bookings }) => {
-    const [weekOffset, setWeekOffset] = useState(0);
+// Helper to get all days for a calendar month grid
+const getCalendarDays = (year: number, month: number) => {
+    const days = [];
+    const firstDayOfMonth = new Date(year, month, 1);
 
-    const { weekDates, weekLabel } = useMemo(() => {
-        const startOfWeek = new Date();
-        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + (weekOffset * 7));
-        const dates = Array.from({ length: 7 }).map((_, i) => {
-            const date = new Date(startOfWeek);
-            date.setDate(date.getDate() + i);
-            return date;
+    const startDate = new Date(firstDayOfMonth);
+    startDate.setDate(startDate.getDate() - firstDayOfMonth.getDay()); // Start from Sunday
+
+    // 6 weeks * 7 days = 42 cells
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        days.push({
+            date: date,
+            isCurrentMonth: date.getMonth() === month,
         });
-        const firstDay = dates[0];
-        const lastDay = dates[6];
-        const label = `${firstDay.getDate()} ${firstDay.toLocaleString('th-TH', { month: 'short' })} - ${lastDay.getDate()} ${lastDay.toLocaleString('th-TH', { month: 'short' })} ${lastDay.getFullYear() + 543}`;
-        return { weekDates: dates, weekLabel: label };
-    }, [weekOffset]);
+    }
+    return days;
+};
 
-    const bookingsByRoomId = useMemo(() => {
-        return bookings.reduce((acc, booking) => {
-            if (!acc[booking.roomId]) {
-                acc[booking.roomId] = [];
+
+const RoomsView: React.FC<{ rooms: Room[], bookings: AdminBooking[] }> = ({ rooms, bookings }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    const goToPreviousMonth = () => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    };
+
+    const goToNextMonth = () => {
+        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    };
+
+    const calendarDays = useMemo(() => {
+        return getCalendarDays(currentDate.getFullYear(), currentDate.getMonth());
+    }, [currentDate]);
+
+    const bookingsByDate = useMemo(() => {
+        const bookingMap = new Map<string, AdminBooking[]>();
+        for (const booking of bookings) {
+            if (booking.status === 'ยกเลิก') continue;
+            
+            let dateIterator = new Date(booking.checkIn);
+            const endDate = new Date(booking.checkOut);
+
+            while (dateIterator < endDate) {
+                const isoDate = formatISODate(dateIterator);
+                const existing = bookingMap.get(isoDate) || [];
+                bookingMap.set(isoDate, [...existing, booking]);
+                dateIterator.setDate(dateIterator.getDate() + 1);
             }
-            acc[booking.roomId].push(booking);
-            return acc;
-        }, {} as Record<string, AdminBooking[]>);
+        }
+        return bookingMap;
     }, [bookings]);
 
-    const getBookingForCell = (roomId: string, date: Date) => {
-        const roomBookings = bookingsByRoomId[roomId] || [];
-        const isoDate = formatISODate(date);
-        return roomBookings.find(b => {
-             const checkIn = new Date(b.checkIn);
-             const checkOut = new Date(b.checkOut);
-             checkIn.setHours(0,0,0,0);
-             checkOut.setHours(0,0,0,0);
-             const targetDate = new Date(isoDate);
-             targetDate.setHours(0,0,0,0);
-             return targetDate >= checkIn && targetDate < checkOut;
-        });
-    };
-    
+    const weekDayLabels = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-3xl font-bold text-brand-light">ปฏิทินห้องพัก</h3>
+            <div className="flex justify-end items-center mb-6">
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setWeekOffset(weekOffset - 1)} className="px-4 py-2 bg-brand-primary rounded-md hover:bg-opacity-80">{"<"}</button>
-                    <span className="w-48 text-center font-semibold">{weekLabel}</span>
-                    <button onClick={() => setWeekOffset(weekOffset + 1)} className="px-4 py-2 bg-brand-primary rounded-md hover:bg-opacity-80">{">"}</button>
+                    <button onClick={goToPreviousMonth} className="px-3 py-1 sm:px-4 sm:py-2 bg-brand-primary rounded-md hover:bg-opacity-80">{"<"}</button>
+                    <span className="w-40 sm:w-48 text-center text-sm sm:text-base font-semibold">
+                        {currentDate.toLocaleString('th-TH', { month: 'long', year: 'numeric' })}
+                    </span>
+                    <button onClick={goToNextMonth} className="px-3 py-1 sm:px-4 sm:py-2 bg-brand-primary rounded-md hover:bg-opacity-80">{">"}</button>
                 </div>
             </div>
-            <div className="bg-brand-primary rounded-lg overflow-x-auto">
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="border-b border-brand-secondary">
-                            <th className="sticky left-0 bg-brand-primary p-3 text-left w-28">ห้อง</th>
-                            {weekDates.map(date => (
-                                <th key={date.toISOString()} className="p-3 font-semibold text-center min-w-[100px]">
-                                    <div>{date.toLocaleString('th-TH', { weekday: 'short' })}</div>
-                                    <div className="text-2xl">{date.getDate()}</div>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rooms.map(room => (
-                            <tr key={room.id} className="border-b border-brand-secondary last:border-0">
-                                <td className="sticky left-0 bg-brand-primary p-3 font-bold">{room.roomNumber}</td>
-                                {weekDates.map((date, dateIndex) => {
-                                    const booking = getBookingForCell(room.id, date);
-                                    if (booking && formatISODate(new Date(booking.checkIn)) === formatISODate(date)) {
-                                        const duration = Math.ceil((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / 86400000);
-                                        const colSpan = Math.min(duration, 7 - dateIndex);
-                                        const cellsToRender = Array.from({ length: 7 - dateIndex });
 
-                                        if (cellsToRender.length < duration) {
-                                            // Booking spans across weeks, render only till end of current week
-                                        }
+            <div className="bg-brand-primary rounded-lg grid grid-cols-7 border-t border-l border-brand-secondary">
+                {/* Weekday Headers */}
+                {weekDayLabels.map(label => (
+                    <div key={label} className="p-2 text-center font-semibold text-brand-text border-r border-b border-brand-secondary bg-brand-secondary/30 text-xs sm:text-sm">
+                        {label}
+                    </div>
+                ))}
 
-                                        return (
-                                            <td key={date.toISOString()} colSpan={colSpan > 0 ? colSpan : 1} className="p-1">
-                                                <div className={`rounded-md p-2 h-16 text-white text-xs overflow-hidden ${booking.status === 'เข้าพัก' ? 'bg-red-600' : 'bg-blue-600'}`}>
-                                                    <p className="font-bold truncate">{booking.guest?.fullName}</p>
-                                                    <p className="truncate">{booking.status}</p>
-                                                </div>
-                                            </td>
-                                        );
-                                    }
-                                    if(booking) return null; // This cell is covered by a colSpan
-                                    return <td key={date.toISOString()} className="h-16 border-l border-brand-secondary"></td>;
-                                })}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {/* Calendar Days */}
+                {calendarDays.map(({ date, isCurrentMonth }) => {
+                    const isoDate = formatISODate(date);
+                    const dayBookings = bookingsByDate.get(isoDate) || [];
+                    const isToday = formatISODate(new Date()) === isoDate;
+
+                    return (
+                        <div 
+                            key={isoDate} 
+                            className="relative p-1 min-h-[120px] border-r border-b border-brand-secondary"
+                        >
+                            <span className={`
+                                flex items-center justify-center w-6 h-6 text-sm font-semibold
+                                ${isToday ? 'bg-brand-accent text-white rounded-full' : ''}
+                                ${isCurrentMonth ? 'text-brand-light' : 'text-brand-text/30'}
+                            `}>
+                                {date.getDate()}
+                            </span>
+                            <div className="absolute top-8 left-1 right-1 space-y-1">
+                                {dayBookings.slice(0, 3).map(booking => (
+                                    <div 
+                                        key={booking.id}
+                                        className={`
+                                            rounded p-1 text-white text-xs overflow-hidden
+                                            ${booking.status === 'เข้าพัก' ? 'bg-red-600' : 'bg-blue-600'}
+                                        `}
+                                        title={`${booking.room?.roomNumber}: ${booking.guest?.fullName}`}
+                                    >
+                                        <p className="font-bold truncate">{booking.room?.roomNumber}: {booking.guest?.fullName}</p>
+                                    </div>
+                                ))}
+                                {dayBookings.length > 3 && (
+                                    <p className="text-xs text-center text-brand-text mt-1">
+                                        + {dayBookings.length - 3} รายการ
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

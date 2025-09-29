@@ -11,12 +11,54 @@ let db = {
         { id: 'r1', roomNumber: 'A101', roomType: 'Standard', price: 400, status: 'ว่าง' },
         { id: 'r2', roomNumber: 'A102', roomType: 'Standard', price: 400, status: 'ว่าง' },
         { id: 'r3', roomNumber: 'A103', roomType: 'Standard', price: 400, status: 'ว่าง' },
-        { id: 'r4', roomNumber: 'A106', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
-        { id: 'r5', roomNumber: 'A107', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
-        { id: 'r6', roomNumber: 'B101', roomType: 'Standard', price: 400, status: 'ว่าง' },
-        { id: 'r7', roomNumber: 'B107', roomType: 'Standard', price: 400, status: 'ว่าง' },
-        { id: 'r8', roomNumber: 'N1', roomType: 'Standard Twin', price: 600, status: 'ว่าง' },
-        { id: 'r9', roomNumber: 'N2', roomType: 'Standard', price: 500, status: 'ว่าง' },
+        { id: 'r4', roomNumber: 'A104', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r5', roomNumber: 'A105', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r6', roomNumber: 'A106', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
+        { id: 'r7', roomNumber: 'A107', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
+        { id: 'r8', roomNumber: 'A108', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
+        { id: 'r9', roomNumber: 'A109', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
+        { id: 'r10', roomNumber: 'A110', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
+        { id: 'r11', roomNumber: 'A111', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r12', roomNumber: 'A201', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r13', roomNumber: 'A202', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r14', roomNumber: 'A203', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r15', roomNumber: 'A204', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r16', roomNumber: 'A205', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r17', roomNumber: 'A206', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r18', roomNumber: 'A207', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r19', roomNumber: 'A208', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r20', roomNumber: 'A209', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r21', roomNumber: 'A210', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r22', roomNumber: 'A211', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r23', roomNumber: 'B101', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r24', roomNumber: 'B102', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r25', roomNumber: 'B103', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r26', roomNumber: 'B104', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r27', roomNumber: 'B105', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r28', roomNumber: 'B106', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r29', roomNumber: 'B107', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r30', roomNumber: 'B108', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r31', roomNumber: 'B109', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r32', roomNumber: 'B110', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r33', roomNumber: 'B111', roomType: 'Standard Twin', price: 500, status: 'ว่าง' },
+        { id: 'r34', roomNumber: 'B201', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r35', roomNumber: 'B202', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r36', roomNumber: 'B203', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r37', roomNumber: 'B204', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r38', roomNumber: 'B205', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r39', roomNumber: 'B206', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r40', roomNumber: 'B207', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r41', roomNumber: 'B208', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r42', roomNumber: 'B209', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r43', roomNumber: 'B210', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r44', roomNumber: 'B211', roomType: 'Standard', price: 400, status: 'ว่าง' },
+        { id: 'r45', roomNumber: 'N1', roomType: 'Standard Twin', price: 600, status: 'ว่าง' },
+        { id: 'r46', roomNumber: 'N2', roomType: 'Standard', price: 500, status: 'ว่าง' },
+        { id: 'r47', roomNumber: 'N3', roomType: 'Standard', price: 500, status: 'ว่าง' },
+        { id: 'r48', roomNumber: 'N4', roomType: 'Standard Twin', price: 600, status: 'ว่าง' },
+        { id: 'r49', roomNumber: 'N5', roomType: 'Standard Twin', price: 600, status: 'ว่าง' },
+        { id: 'r50', roomNumber: 'N6', roomType: 'Standard Twin', price: 600, status: 'ว่าง' },
+        { id: 'r51', roomNumber: 'N7', roomType: 'Standard', price: 500, status: 'ว่าง' },
     ] as Room[],
     guests: [
         { id: 'g1', fullName: 'สมชาย ใจดี', phoneNumber: '0812345678', status: 'active' },
@@ -28,11 +70,11 @@ let db = {
     bookings: [
         // Current Stays
         { id: 'VP01244', guestId: 'g1', roomId: 'r1', checkIn: formatISODate(yesterday), checkOut: formatISODate(tomorrow), status: 'เข้าพัก', totalAmount: 800, feeAmount: 8, finalAmount: 808, paymentMethod: 'เงินสด' },
-        { id: 'b2', guestId: 'g2', roomId: 'r4', checkIn: formatISODate(today), checkOut: formatISODate(new Date(tomorrow.getTime() + 86400000)), status: 'เข้าพัก', totalAmount: 1000, feeAmount: 10, finalAmount: 1010, paymentMethod: 'เงินโอน QR' },
+        { id: 'b2', guestId: 'g2', roomId: 'r6', checkIn: formatISODate(today), checkOut: formatISODate(new Date(tomorrow.getTime() + 86400000)), status: 'เข้าพัก', totalAmount: 1000, feeAmount: 10, finalAmount: 1010, paymentMethod: 'เงินโอน QR' },
         // Upcoming Bookings
         { id: 'b3', guestId: 'g3', roomId: 'r2', checkIn: formatISODate(new Date(today.getTime() + 86400000 * 2)), checkOut: formatISODate(new Date(today.getTime() + 86400000 * 3)), status: 'จอง', totalAmount: 400, feeAmount: 4, finalAmount: 404, paymentMethod: 'Pending' },
         // Past Stays
-        { id: 'b5', guestId: 'g5', roomId: 'r9', checkIn: formatISODate(new Date(today.getTime() - 86400000 * 5)), checkOut: formatISODate(new Date(today.getTime() - 86400000 * 4)), status: 'เช็คเอาท์แล้ว', totalAmount: 500, feeAmount: 5, finalAmount: 505, paymentMethod: 'เงินสด' },
+        { id: 'b5', guestId: 'g5', roomId: 'r46', checkIn: formatISODate(new Date(today.getTime() - 86400000 * 5)), checkOut: formatISODate(new Date(today.getTime() - 86400000 * 4)), status: 'เช็คเอาท์แล้ว', totalAmount: 500, feeAmount: 5, finalAmount: 505, paymentMethod: 'เงินสด' },
     ] as AdminBooking[],
     expenses: {
         [formatISODate(today)]: [ { id: 'e1', date: formatISODate(today), category: 'ของใช้ในห้องน้ำ', amount: 550.75, note: 'สบู่, แชมพู' }, ],
@@ -126,6 +168,17 @@ export const createBooking = (bookingData: Omit<AdminBooking, 'id'>): Promise<Ad
     const newBooking: AdminBooking = { ...bookingData, id: `b${Date.now()}` };
     db.bookings.push(newBooking);
     return simulateApiCall(newBooking);
+};
+
+export const updateBooking = (id: string, data: Partial<Omit<AdminBooking, 'id' | 'guestId'>>): Promise<AdminBooking> => {
+    const bookingIndex = db.bookings.findIndex(b => b.id === id);
+    if (bookingIndex === -1) throw new Error("Booking not found");
+    
+    const currentGuestId = db.bookings[bookingIndex].guestId;
+    const updatedBooking = { ...db.bookings[bookingIndex], ...data, guestId: currentGuestId };
+    db.bookings[bookingIndex] = updatedBooking;
+
+    return simulateApiCall(updatedBooking);
 };
 
 export const updateBookingStatus = (id: string, status: AdminBooking['status']): Promise<AdminBooking> => {

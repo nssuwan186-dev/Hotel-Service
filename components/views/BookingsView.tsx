@@ -1,94 +1,125 @@
-import React, { useMemo, useState } from 'react';
-import { AdminBooking } from '../../types';
-import { formatThaiDate, formatISODate } from '../../services/utils';
-import { generateInvoicePDF } from '../../services/pdfService';
-import { PrintIcon } from '../icons/PrintIcon';
 
-type BookingFilter = 'upcoming' | 'current' | 'past';
 
-const BookingsView: React.FC<{ bookings: AdminBooking[], onCancel: (id: string) => void, onAddClick: () => void }> = ({ bookings, onCancel, onAddClick }) => {
-    const [filter, setFilter] = useState<BookingFilter>('upcoming');
+import React, { useMemo } from 'react';
+import { AdminBooking, Room, Expense } from '../../types';
+import { formatThaiDate } from '../../services/utils';
 
-    const handlePrintReceipt = (booking: AdminBooking) => {
-        generateInvoicePDF(booking);
-    };
+// Helper for key-value pairs in the report block
+const ReportRow: React.FC<{ label: string; value: string | number; valueClass?: string; isSubItem?: boolean }> = ({ label, value, valueClass = 'text-brand-light', isSubItem = false }) => (
+    <div className={`flex justify-between py-1 ${isSubItem ? 'pl-4' : ''}`}>
+        <p className="text-brand-text">{label}</p>
+        <p className={`font-semibold ${valueClass}`}>{value}</p>
+    </div>
+);
 
-    const filteredBookings = useMemo(() => {
-        switch (filter) {
-            case 'upcoming':
-                return [...bookings].filter(b => b.status === 'จอง').sort((a,b) => new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime());
-            case 'current':
-                return [...bookings].filter(b => b.status === 'เข้าพัก');
-            case 'past':
-                return [...bookings].filter(b => b.status === 'เช็คเอาท์แล้ว' || b.status === 'ยกเลิก').sort((a,b) => new Date(b.checkOut).getTime() - new Date(a.checkOut).getTime());
-            default:
-                return [];
-        }
-    }, [bookings, filter]);
-    
-    const filterOptions: { key: BookingFilter, label: string }[] = [
-        { key: 'upcoming', label: 'การจองล่วงหน้า' },
-        { key: 'current', label: 'กำลังเข้าพัก' },
-        { key: 'past', label: 'ประวัติการเข้าพัก' },
-    ];
+
+const BookingsView: React.FC<{ 
+    bookings: AdminBooking[]; 
+    rooms: Room[]; 
+    expenses: Record<string, Expense[]>;
+    selectedDate: string;
+    onDateChange: (date: string) => void;
+    onAddBooking: () => void;
+    onAddExpense: () => void;
+}> = ({ bookings, rooms, expenses, selectedDate, onDateChange, onAddBooking, onAddExpense }) => {
+
+    const dailyData = useMemo(() => {
+        // Revenue is recognized from checkouts on the selected day
+        const checkOutsForDate = bookings.filter(b => 
+            b.checkOut === selectedDate && b.status === 'เช็คเอาท์แล้ว'
+        );
+        
+        const revenueCash = checkOutsForDate
+            .filter(b => b.paymentMethod === 'เงินสด')
+            .reduce((sum, b) => sum + b.finalAmount, 0);
+
+        const revenueTransfer = checkOutsForDate
+            .filter(b => b.paymentMethod === 'เงินโอน QR')
+            .reduce((sum, b) => sum + b.finalAmount, 0);
+
+        const activeStays = bookings.filter(b => {
+            if (b.status === 'จอง' || b.status === 'ยกเลิก') return false;
+            // A stay is active if the selected date is between check-in (inclusive) and check-out (exclusive)
+            const checkIn = new Date(b.checkIn);
+            checkIn.setHours(0,0,0,0);
+            const checkOut = new Date(b.checkOut);
+            checkOut.setHours(0,0,0,0);
+            const selected = new Date(selectedDate);
+            selected.setHours(0,0,0,0);
+            return checkIn <= selected && checkOut > selected;
+        });
+
+        const dailyExpensesTotal = (expenses[selectedDate] || []).reduce((sum, e) => sum + e.amount, 0);
+
+        return {
+            checkOutsForDate,
+            revenueCash,
+            revenueTransfer,
+            totalRevenue: revenueCash + revenueTransfer,
+            roomCountA: rooms.filter(r => r.roomNumber.startsWith('A')).length,
+            roomCountB: rooms.filter(r => r.roomNumber.startsWith('B')).length,
+            roomCountN: rooms.filter(r => r.roomNumber.startsWith('N')).length,
+            dailyExpensesTotal,
+            occupiedRooms: activeStays.map(b => b.room?.roomNumber).filter(Boolean).join(', ') || 'ไม่มี',
+        };
+    }, [bookings, rooms, expenses, selectedDate]);
+
 
     return (
-         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-3xl font-bold text-brand-light">การจอง</h3>
-                <button onClick={onAddClick} className="bg-brand-accent text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90">+ เพิ่มการจอง</button>
-            </div>
-             <div className="mb-4 flex gap-2 border-b border-brand-primary">
-                {filterOptions.map(opt => (
-                    <button key={opt.key} onClick={() => setFilter(opt.key)} className={`py-2 px-4 font-semibold transition-colors ${filter === opt.key ? 'border-b-2 border-brand-accent text-brand-light' : 'text-brand-text hover:text-white'}`}>
-                        {opt.label}
+        <div>
+            {/* Control Bar with Date Picker and Buttons */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                 <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => onDateChange(e.target.value)}
+                    className="bg-brand-secondary border border-brand-primary text-brand-light px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-accent w-full sm:w-auto"
+                />
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button onClick={onAddBooking} className="flex-1 sm:flex-none bg-brand-accent text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90">
+                        + เพิ่มการจอง
                     </button>
-                ))}
+                    <button onClick={onAddExpense} className="flex-1 sm:flex-none bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                        + เพิ่มค่าใช้จ่าย
+                    </button>
+                </div>
             </div>
-            <div className="bg-brand-primary rounded-lg overflow-x-auto shadow-lg">
-                 <table className="w-full text-left">
-                    <thead className="border-b border-brand-secondary">
-                        <tr>
-                            <th className="p-4 font-semibold">ลูกค้า</th>
-                            <th className="p-4 font-semibold">ห้อง</th>
-                            <th className="p-4 font-semibold">วันเวลา</th>
-                            <th className="p-4 font-semibold">สถานะ</th>
-                            <th className="p-4 font-semibold">ใบเสร็จ</th>
-                            <th className="p-4 font-semibold text-right">ดำเนินการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredBookings.length === 0 && (
-                            <tr><td colSpan={6} className="p-4 text-center text-brand-text">ไม่มีข้อมูล</td></tr>
-                        )}
-                        {filteredBookings.map(b => (
-                             <tr key={b.id} className="border-b border-brand-secondary last:border-b-0">
-                                <td className="p-4">{b.guest?.fullName}</td>
-                                <td className="p-4">{b.room?.roomNumber}</td>
-                                <td className="p-4">{formatThaiDate(b.checkIn)} - {formatThaiDate(b.checkOut)}</td>
-                                <td className="p-4">
-                                    <span className={`text-xs px-2 py-1 rounded-full ${
-                                        b.status === 'ยกเลิก' ? 'bg-red-900/70 text-red-300' : 'bg-brand-secondary text-brand-text'
-                                    }`}>
-                                        {b.status}
-                                    </span>
-                                </td>
-                                <td className="p-4">
-                                    {(filter === 'current' || filter === 'past') && b.status !== 'ยกเลิก' && b.status !== 'จอง' && (
-                                         <button onClick={() => handlePrintReceipt(b)} className="flex items-center gap-2 text-sm bg-brand-secondary hover:bg-opacity-80 text-brand-light font-bold py-1 px-3 rounded-md transition-colors">
-                                            <PrintIcon />
-                                            พิมพ์
-                                         </button>
-                                    )}
-                                </td>
-                                <td className="p-4 text-right">
-                                    {b.status === 'จอง' && <button onClick={() => onCancel(b.id)} className="text-yellow-500 hover:text-yellow-400 font-semibold">ยกเลิก</button>}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+
+            {/* Daily Report Block */}
+            <div className="bg-brand-primary p-4 rounded-lg shadow-lg mb-6">
+                <h4 className="text-lg font-semibold text-brand-light mb-2 border-b border-brand-secondary pb-2">รายงานประจำวัน</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm mt-3">
+                    {/* Income Section */}
+                    <div>
+                        <p className="font-bold mb-1 text-brand-light">รายรับประจำวัน</p>
+                        <ReportRow label="จำนวนเช็คเอาท์" value={`${dailyData.checkOutsForDate.length} รายการ`} isSubItem />
+                        <ReportRow label="ยอดเงินสด" value={`฿${dailyData.revenueCash.toLocaleString('en-US', { minimumFractionDigits: 2 })}`} isSubItem />
+                        <ReportRow label="ยอดเงินโอน" value={`฿${dailyData.revenueTransfer.toLocaleString('en-US', { minimumFractionDigits: 2 })}`} isSubItem />
+                        <ReportRow label="ยอดรวม" value={`฿${dailyData.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`} valueClass="text-green-400 font-bold" />
+                    </div>
+
+                    {/* Room Count Section */}
+                    <div>
+                        <p className="font-bold mb-1 text-brand-light">จำนวนห้องพัก</p>
+                        <ReportRow label="ตึก A" value={`${dailyData.roomCountA} ห้อง`} isSubItem />
+                        <ReportRow label="ตึก B" value={`${dailyData.roomCountB} ห้อง`} isSubItem />
+                        <ReportRow label="ตึกดาวน์ N" value={`${dailyData.roomCountN} ห้อง`} isSubItem />
+                    </div>
+
+                    {/* Expenses Section */}
+                    <div className="border-t border-brand-secondary pt-3">
+                        <ReportRow label="หักค่าจ่ายประจำวัน" value={`- ฿${dailyData.dailyExpensesTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`} valueClass="text-red-400 font-bold" />
+                    </div>
+
+                    {/* Occupied Rooms Section */}
+                     <div className="border-t border-brand-secondary pt-3">
+                        <p className="text-brand-text">หมายเลขห้องที่มีการเข้าพัก</p>
+                        <p className="font-semibold text-brand-light truncate">{dailyData.occupiedRooms}</p>
+                    </div>
+                </div>
             </div>
+            
+            {/* The detailed lists have been removed to avoid functional overlap */}
         </div>
     );
 };

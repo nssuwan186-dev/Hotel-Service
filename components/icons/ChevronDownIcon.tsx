@@ -1,7 +1,6 @@
-
 import React from 'react';
 
-export const PrintIcon: React.FC = () => (
+export const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
         width="16" 
@@ -12,9 +11,8 @@ export const PrintIcon: React.FC = () => (
         strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round"
+        className={className}
     >
-        <polyline points="6 9 6 2 18 2 18 9"></polyline>
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-        <rect x="6" y="14" width="12" height="8"></rect>
+        <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
 );

@@ -9,7 +9,7 @@ interface PdfData {
 export const generatePayrollPDF = (data: PdfData) => {
     const { periodTitle, rows } = data;
 
-    const doc = new jsPDF({
+    const doc = new jspdf.jsPDF({
         orientation: "landscape",
         unit: "mm",
         format: "a4",

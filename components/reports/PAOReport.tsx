@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { AdminBooking } from '../../types';
 import { FormSelect } from '../AdminPanel';
@@ -37,59 +36,66 @@ const PAOReport: React.FC<{ bookings: AdminBooking[] }> = ({ bookings }) => {
     
     return (
         <div>
-            <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-brand-secondary rounded-md">
-                <FormSelect label="เลือกเดือน" value={month.toString()} onChange={e => setMonth(parseInt(e.target.value, 10))} options={monthOptions} />
-                <FormSelect label="เลือกปี (พ.ศ.)" value={year.toString()} onChange={e => setYear(parseInt(e.target.value, 10))} options={yearOptions} />
-            </div>
+            <div className="bg-brand-primary p-6 rounded-lg shadow-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <FormSelect label="เลือกเดือน" value={month.toString()} onChange={e => setMonth(parseInt(e.target.value, 10))} options={monthOptions} />
+                    <FormSelect label="เลือกปี (พ.ศ.)" value={year.toString()} onChange={e => setYear(parseInt(e.target.value, 10))} options={yearOptions} />
+                </div>
 
-            <div className="text-center mb-4">
-                <h4 className="text-lg font-bold">บัญชีผู้เข้าพักและรายละเอียดในการเรียกเก็บค่าธรรมเนียมบำรุงองค์การบริหารส่วนจังหวัด</h4>
-                <p>เจ้าของ/เจ้าสำนักโรงแรม วิพัฒน์โฮเทลดีเวลลอปเม้นท์จำกัด</p>
-                <p>ประจำเดือน {monthOptions.find(m => m.value === month.toString())?.label} พ.ศ. {year + 543}</p>
-            </div>
-            
-            <div className="overflow-x-auto">
-                 <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="bg-brand-secondary">
-                        <tr>
-                            <th className="p-2">ที่</th>
-                            <th className="p-2">ชื่อ-สกุล</th>
-                            <th className="p-2">วันเวลาที่เข้าพัก</th>
-                            <th className="p-2 text-center">รวมจำนวนวัน</th>
-                            <th className="p-2 text-right">ราคาห้องพัก (บาท)</th>
-                            <th className="p-2 text-right">รวมค่าเช่า (บาท)</th>
-                            <th className="p-2 text-right">ค่าธรรมเนียม (บาท)</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-brand-secondary">
-                        {reportData.map((b, index) => {
-                            const duration = getDuration(b.checkIn, b.checkOut);
-                            return (
-                                <tr key={b.id}>
-                                    <td className="p-2">{index + 1}</td>
-                                    <td className="p-2">{b.guest?.fullName}</td>
-                                    <td className="p-2">{new Date(b.checkIn).toLocaleDateString('th-TH')}</td>
-                                    <td className="p-2 text-center">{duration}</td>
-                                    <td className="p-2 text-right">{b.room?.price.toFixed(2)}</td>
-                                    <td className="p-2 text-right">{b.totalAmount.toFixed(2)}</td>
-                                    <td className="p-2 text-right">{b.feeAmount.toFixed(2)}</td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                    <tfoot className="bg-brand-secondary font-bold">
-                        <tr>
-                            <td colSpan={5} className="p-2 text-right">รวมทั้งสิ้น</td>
-                            <td className="p-2 text-right">{totals.totalAmount.toFixed(2)}</td>
-                            <td className="p-2 text-right">{totals.feeAmount.toFixed(2)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-             <div className="mt-6 text-right">
-                <button className="bg-brand-accent text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90">
-                    Export เป็น PDF
-                </button>
+                <div className="text-center mb-4">
+                    <h4 className="text-xl font-bold">บัญชีผู้เข้าพักและรายละเอียดในการเรียกเก็บค่าธรรมเนียมบำรุงองค์การบริหารส่วนจังหวัด</h4>
+                    <p className="text-sm text-brand-text">เจ้าของ/เจ้าสำนักโรงแรม วิพัฒน์โฮเทลดีเวลลอปเม้นท์จำกัด</p>
+                    <p className="text-sm text-brand-text">ประจำเดือน {monthOptions.find(m => m.value === month.toString())?.label} พ.ศ. {year + 543}</p>
+                </div>
+                
+                <div className="">
+                     <table className="w-full text-left text-sm whitespace-nowrap">
+                        <thead className="hidden md:table-header-group bg-brand-secondary">
+                            <tr>
+                                <th className="p-2 text-xs uppercase text-brand-text tracking-wider">ที่</th>
+                                <th className="p-2 text-xs uppercase text-brand-text tracking-wider">ชื่อ-สกุล</th>
+                                <th className="p-2 text-xs uppercase text-brand-text tracking-wider">วันเวลาที่เข้าพัก</th>
+                                <th className="p-2 text-center text-xs uppercase text-brand-text tracking-wider">รวมจำนวนวัน</th>
+                                <th className="p-2 text-right text-xs uppercase text-brand-text tracking-wider">ราคาห้องพัก (บาท)</th>
+                                <th className="p-2 text-right text-xs uppercase text-brand-text tracking-wider">รวมค่าเช่า (บาท)</th>
+                                <th className="p-2 text-right text-xs uppercase text-brand-text tracking-wider">ค่าธรรมเนียม (บาท)</th>
+                            </tr>
+                        </thead>
+                        <tbody className="block md:table-row-group">
+                            {reportData.map((b, index) => {
+                                const duration = getDuration(b.checkIn, b.checkOut);
+                                return (
+                                    <tr key={b.id} className="block p-3 mb-3 bg-brand-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-brand-primary">
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">ที่</span><span>{index + 1}</span></td>
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">ชื่อ-สกุล</span><span>{b.guest?.fullName}</span></td>
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">วันที่เข้าพัก</span><span>{new Date(b.checkIn).toLocaleDateString('th-TH')}</span></td>
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-center"><span className="font-semibold text-brand-text md:hidden">รวมวัน</span><span>{duration}</span></td>
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-right"><span className="font-semibold text-brand-text md:hidden">ราคาห้องพัก</span><span>{b.room?.price.toFixed(2)}</span></td>
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-right"><span className="font-semibold text-brand-text md:hidden">รวมค่าเช่า</span><span>{b.totalAmount.toFixed(2)}</span></td>
+                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-right"><span className="font-semibold text-brand-text md:hidden">ค่าธรรมเนียม</span><span>{b.feeAmount.toFixed(2)}</span></td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                        <tfoot className="hidden md:table-footer-group bg-brand-secondary font-bold">
+                            <tr>
+                                <td colSpan={5} className="p-2 text-right">รวมทั้งสิ้น</td>
+                                <td className="p-2 text-right">{totals.totalAmount.toFixed(2)}</td>
+                                <td className="p-2 text-right">{totals.feeAmount.toFixed(2)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div className="md:hidden mt-4 p-4 bg-brand-secondary rounded-lg font-bold text-sm">
+                        <div className="flex justify-between py-1"><span>รวมค่าเช่าทั้งสิ้น</span><span>{totals.totalAmount.toFixed(2)}</span></div>
+                        <div className="flex justify-between py-1 border-t border-brand-primary"><span>รวมค่าธรรมเนียม</span><span>{totals.feeAmount.toFixed(2)}</span></div>
+                    </div>
+                </div>
+                 <div className="mt-6 text-right">
+                    <button className="bg-brand-accent text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90">
+                        Export เป็น PDF
+                    </button>
+                </div>
             </div>
         </div>
     )

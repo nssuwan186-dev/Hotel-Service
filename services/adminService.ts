@@ -57,7 +57,35 @@ export const addBooking = async (booking: Omit<AdminBooking, 'id' | 'status' | '
     return api.createBooking(newBookingData);
 };
 
+export const updateBooking = async (id: string, bookingUpdate: { roomId: string, checkIn: string, checkOut: string }): Promise<AdminBooking> => {
+    const { roomId, checkIn, checkOut } = bookingUpdate;
+    
+    const room = await api.fetchRoomById(roomId);
+    if (!room) throw new Error("Room not found");
+
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const durationDays = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)));
+    
+    const totalAmount = durationDays * room.price;
+    const feeAmount = totalAmount * 0.01; // 1% Provincial Admin Org Fee
+    const finalAmount = totalAmount + feeAmount;
+
+    const updatedData = {
+        roomId,
+        checkIn,
+        checkOut,
+        totalAmount,
+        feeAmount,
+        finalAmount,
+    };
+    
+    return api.updateBooking(id, updatedData);
+};
+
 export const cancelBooking = (id: string): Promise<AdminBooking> => api.updateBookingStatus(id, 'ยกเลิก');
+export const checkInBooking = (id: string): Promise<AdminBooking> => api.updateBookingStatus(id, 'เข้าพัก');
+export const checkOutBooking = (id: string): Promise<AdminBooking> => api.updateBookingStatus(id, 'เช็คเอาท์แล้ว');
 
 export const getExpensesForDate = (isoDate: string): Promise<Expense[]> => api.fetchExpensesByDate(isoDate);
 export const getAllExpenses = (): Promise<Record<string, Expense[]>> => api.fetchAllExpenses();

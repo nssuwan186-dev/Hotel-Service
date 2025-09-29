@@ -15,8 +15,8 @@ export const generateUtilityBillPDF = (data: BillData) => {
     const { tenant, utilityRates, year, month, currentReading, prevReading } = data;
 
     // FIX: The jsPDF constructor is available globally from a script tag.
-    // The incorrect destructuring from the window object has been removed.
-    const doc = new jsPDF({
+    // It is accessed via `jspdf.jsPDF`.
+    const doc = new jspdf.jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",

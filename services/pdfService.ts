@@ -10,8 +10,8 @@ export const generateInvoicePDF = (booking: AdminBooking) => {
     }
 
     // FIX: The jsPDF constructor is available globally from a script tag.
-    // The incorrect destructuring from the window object has been removed.
-    const doc = new jsPDF({
+    // It is accessed via `jspdf.jsPDF`.
+    const doc = new jspdf.jsPDF({
         orientation: "landscape",
         unit: "mm",
         format: "a4",

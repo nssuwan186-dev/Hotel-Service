@@ -91,32 +91,31 @@ const MonthlyTenantsView: React.FC<MonthlyTenantsViewProps> = ({ tenants, meterR
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-3xl font-bold text-brand-light">จัดการผู้เช่ารายเดือน</h3>
+            <div className="flex justify-end items-center mb-6">
                 <button onClick={onAdd} className="bg-brand-accent text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90">+ เพิ่มผู้เช่าใหม่</button>
             </div>
             
             {/* Tenants List Table */}
             <div className="bg-brand-primary p-6 rounded-lg shadow-lg">
                 <h4 className="font-semibold text-xl text-brand-light mb-4">รายชื่อผู้เช่าปัจจุบัน</h4>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left whitespace-nowrap">
-                        <thead className="border-b border-brand-secondary">
+                <div className="">
+                    <table className="w-full text-left whitespace-nowrap text-sm">
+                        <thead className="hidden md:table-header-group border-b border-brand-secondary">
                             <tr>
-                                <th className="p-3 font-semibold">ชื่อ-สกุล</th>
-                                <th className="p-3 font-semibold">ห้อง</th>
-                                <th className="p-3 font-semibold text-right">ค่าเช่า (บาท)</th>
-                                <th className="p-3 font-semibold text-center">จัดการ</th>
+                                <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-brand-text tracking-wider">ชื่อ-สกุล</th>
+                                <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-brand-text tracking-wider">ห้อง</th>
+                                <th className="p-3 font-semibold text-right text-xs sm:text-sm uppercase text-brand-text tracking-wider">ค่าเช่า (บาท)</th>
+                                <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">จัดการ</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="block md:table-row-group">
                             {tenants.map((tenant) => (
-                                <tr key={tenant.id} className="border-b border-brand-secondary last:border-b-0 hover:bg-brand-secondary/30">
-                                    <td className="p-3 font-medium">{tenant.name}</td>
-                                    <td className="p-3">{tenant.roomNumber}</td>
-                                    <td className="p-3 text-right">{tenant.rent.toLocaleString()}</td>
-                                    <td className="p-3">
-                                        <div className="flex justify-center items-center gap-2">
+                                <tr key={tenant.id} className="block p-4 mb-4 bg-brand-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-brand-primary last:md:border-b-0">
+                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3"><span className="font-semibold text-brand-text md:hidden">ชื่อ-สกุล</span><span className="font-medium">{tenant.name}</span></td>
+                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3"><span className="font-semibold text-brand-text md:hidden">ห้อง</span><span>{tenant.roomNumber}</span></td>
+                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3 md:text-right"><span className="font-semibold text-brand-text md:hidden">ค่าเช่า</span><span>{tenant.rent.toLocaleString()}</span></td>
+                                    <td className="py-2 md:table-cell md:p-3">
+                                        <div className="flex justify-end items-center gap-2 mt-2 md:mt-0 md:justify-center">
                                             <button onClick={() => handleSelectTenantForMeters(tenant)} className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md transition-colors">
                                                 จัดการมิเตอร์
                                             </button>
@@ -145,30 +144,32 @@ const MonthlyTenantsView: React.FC<MonthlyTenantsViewProps> = ({ tenants, meterR
                         <FormSelect label="เลือกปี (พ.ศ.)" value={selectedYear.toString()} onChange={e => setSelectedYear(parseInt(e.target.value, 10))} options={yearOptions} />
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left whitespace-nowrap">
-                            <thead className="border-b border-brand-secondary">
+                    <div className="">
+                        <table className="w-full text-left whitespace-nowrap text-sm">
+                            <thead className="hidden md:table-header-group border-b border-brand-secondary">
                                 <tr>
-                                    <th className="p-3 font-semibold">เดือน</th>
-                                    <th className="p-3 font-semibold text-center">มิเตอร์น้ำ (หน่วย)</th>
-                                    <th className="p-3 font-semibold text-center">มิเตอร์ไฟ (หน่วย)</th>
-                                    <th className="p-3 font-semibold text-center">ดำเนินการ</th>
+                                    <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-brand-text tracking-wider">เดือน</th>
+                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">มิเตอร์น้ำ (หน่วย)</th>
+                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">มิเตอร์ไฟ (หน่วย)</th>
+                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">ดำเนินการ</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="block md:table-row-group">
                                 {months.map((monthName, index) => {
                                     const reading = currentReadings[selectedYear.toString()]?.[index.toString()] || { water: null, electricity: null };
                                     return (
-                                        <tr key={index} className="border-b border-brand-secondary last:border-b-0">
-                                            <td className="p-2 font-medium">{monthName}</td>
-                                            <td className="p-2">
-                                                <input type="number" className="w-full bg-brand-secondary text-brand-light p-2 rounded-md text-center" value={reading.water ?? ''} onChange={e => handleReadingChange(index, 'water', e.target.value)} />
+                                        <tr key={index} className="block p-4 mb-4 bg-brand-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-brand-primary last:md:border-b-0">
+                                            <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">เดือน</span><span className="font-medium">{monthName}</span></td>
+                                            <td className="block py-2 md:table-cell md:p-2">
+                                                <label className="font-semibold text-brand-text md:hidden mb-1 block">มิเตอร์น้ำ (หน่วย)</label>
+                                                <input type="number" className="w-full bg-brand-primary text-brand-light p-2 rounded-md text-center md:bg-brand-secondary" value={reading.water ?? ''} onChange={e => handleReadingChange(index, 'water', e.target.value)} />
                                             </td>
-                                            <td className="p-2">
-                                                <input type="number" className="w-full bg-brand-secondary text-brand-light p-2 rounded-md text-center" value={reading.electricity ?? ''} onChange={e => handleReadingChange(index, 'electricity', e.target.value)} />
+                                            <td className="block py-2 md:table-cell md:p-2">
+                                                 <label className="font-semibold text-brand-text md:hidden mb-1 block">มิเตอร์ไฟ (หน่วย)</label>
+                                                <input type="number" className="w-full bg-brand-primary text-brand-light p-2 rounded-md text-center md:bg-brand-secondary" value={reading.electricity ?? ''} onChange={e => handleReadingChange(index, 'electricity', e.target.value)} />
                                             </td>
-                                            <td className="p-2 text-center">
-                                                <button onClick={() => handlePrintInvoice(index)} className="flex items-center justify-center gap-2 w-full text-sm bg-brand-secondary hover:bg-opacity-80 text-brand-light font-bold py-2 px-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled={reading.water === null || reading.electricity === null}>
+                                            <td className="block pt-3 md:table-cell md:p-2 md:text-center">
+                                                <button onClick={() => handlePrintInvoice(index)} className="flex items-center justify-center gap-2 w-full text-sm bg-brand-primary hover:bg-opacity-80 text-brand-light font-bold py-2 px-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed md:bg-brand-secondary" disabled={reading.water === null || reading.electricity === null}>
                                                     <PrintIcon /> พิมพ์ใบแจ้งหนี้
                                                 </button>
                                             </td>

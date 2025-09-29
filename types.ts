@@ -4,7 +4,11 @@
 // Declare global variables from script tags
 // FIX: Wrapped in declare global to correctly augment the global scope from within a module.
 declare global {
-  var jsPDF: any;
+  // jsPDF UMD library exposes a 'jspdf' object on the window
+  const jspdf: {
+    jsPDF: any; // The constructor is accessed via jspdf.jsPDF
+  };
+  // jspdf-autotable plugin
   var autoTable: any;
 }
 
@@ -53,6 +57,15 @@ export interface Expense {
   amount: number;
   note: string;
   date: string; // YYYY-MM-DD
+}
+
+// Notification System Type
+export interface Notification {
+  id: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+  type: 'info' | 'warning' | 'success' | 'error';
 }
 
 // Monthly Tenant Types
