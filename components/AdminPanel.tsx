@@ -24,6 +24,7 @@ import ExpenseHistoryView from './views/ExpenseHistoryView';
 import Header from './Header';
 import AvailabilityView from './views/AvailabilityView';
 import TasksView from './views/TasksView';
+import AnalyticsView from './views/AnalyticsView';
 
 import { CashIcon } from './icons/CashIcon';
 import { DatabaseIcon } from './icons/DatabaseIcon';
@@ -39,8 +40,9 @@ import { UsersIcon } from './icons/UsersIcon';
 import { SearchCircleIcon } from './icons/SearchCircleIcon';
 import { UserGroupIcon } from './icons/UserGroupIcon';
 import { BriefcaseIcon } from './icons/BriefcaseIcon';
+import { SparklesIcon } from './icons/SparklesIcon';
 
-type AdminView = 'dashboard' | 'rooms' | 'monthlyTenants' | 'payroll' | 'employees' | 'guests' | 'tenantsDB' | 'roomsDB' | 'paoReport' | 'municipalityReport' | 'bookingList' | 'checkInList' | 'checkOutList' | 'expenseHistory' | 'availability' | 'tasks';
+type AdminView = 'dashboard' | 'rooms' | 'monthlyTenants' | 'payroll' | 'employees' | 'guests' | 'tenantsDB' | 'roomsDB' | 'paoReport' | 'municipalityReport' | 'bookingList' | 'checkInList' | 'checkOutList' | 'expenseHistory' | 'availability' | 'tasks' | 'analytics';
 type ModalContent = 'addBooking' | 'editBooking' | 'addEditExpense' | 'deleteExpenseConfirmation' | 'cancelBookingConfirmation' | 'addEditTenant' | 'deleteTenantConfirmation' | 'addEditEmployee' | 'deleteEmployeeConfirmation' | 'addEditGuest' | 'deleteGuestConfirmation' | 'addEditRoom' | 'deleteRoomConfirmation' | 'addEditTask' | 'deleteTaskConfirmation' | null;
 
 const useAdminData = () => {
@@ -566,7 +568,7 @@ const AdminPanel: React.FC = () => {
             booking: ['bookingList', 'checkInList', 'checkOutList', 'availability'],
             monthly: ['monthlyTenants', 'payroll'],
             database: ['guests', 'tenantsDB', 'employees', 'roomsDB'],
-            reports: ['paoReport', 'municipalityReport', 'expenseHistory'],
+            reports: ['paoReport', 'municipalityReport', 'expenseHistory', 'analytics'],
         };
 
         const currentParentMenu = Object.keys(menuMapping).find(key => 
@@ -920,6 +922,8 @@ const AdminPanel: React.FC = () => {
                 return <TenantsDBView tenants={allTenants} onAdd={() => handleOpenModal('addEditTenant')} onEdit={(t) => handleOpenModal('addEditTenant', t)} onDelete={(t) => handleOpenModal('deleteTenantConfirmation', t)} />;
             case 'roomsDB':
                 return <RoomsDBView rooms={rooms} onAdd={() => handleOpenModal('addEditRoom')} onEdit={(r) => handleOpenModal('addEditRoom', r)} onDelete={(r) => handleOpenModal('deleteRoomConfirmation', r)} />;
+            case 'analytics':
+                return <AnalyticsView bookings={bookings} expenses={expenses} rooms={rooms} />;
             default:
                 return null;
         }
@@ -942,6 +946,7 @@ const AdminPanel: React.FC = () => {
         guests: 'ฐานข้อมูลผู้เข้าพัก',
         tenantsDB: 'ฐานข้อมูลผู้เช่า',
         roomsDB: 'ฐานข้อมูลห้องพัก',
+        analytics: 'รายงานวิเคราะห์ (BI)',
     };
     
     const NavLink: React.FC<{
@@ -1048,6 +1053,7 @@ const AdminPanel: React.FC = () => {
                         isOpen={openMenu === 'reports'}
                         onToggle={() => setOpenMenu(openMenu === 'reports' ? null : 'reports')}
                      >
+                         <NavLink view="analytics" icon={<SparklesIcon />} label="วิเคราะห์ข้อมูล (BI)" isSub />
                          <NavLink view="expenseHistory" icon={<ReceiptIcon />} label="ประวัติค่าใช้จ่าย" isSub />
                          <NavLink view="paoReport" icon={<span className="w-6">-</span>} label="รายงาน อบจ." isSub />
                          <NavLink view="municipalityReport" icon={<span className="w-6">-</span>} label="รายงานเทศบาล" isSub />
