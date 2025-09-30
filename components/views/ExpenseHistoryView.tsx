@@ -50,7 +50,7 @@ const ExpenseHistoryView: React.FC<ExpenseHistoryViewProps> = ({ allExpenses, on
                 allExpenses[date].forEach(expense => {
                     if (
                         expense.category.toLowerCase().includes(lowercasedTerm) ||
-                        expense.note.toLowerCase().includes(lowercasedTerm)
+                        (expense.note || '').toLowerCase().includes(lowercasedTerm)
                     ) {
                         filtered.push(expense);
                         total += expense.amount;
