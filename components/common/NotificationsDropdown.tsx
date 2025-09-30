@@ -19,29 +19,29 @@ const NotificationTypeIcon: React.FC<{ type: Notification['type'] }> = ({ type }
 
 const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({ notifications, onClearAll }) => {
     return (
-        <div className="absolute top-full right-0 mt-2 w-80 max-w-sm bg-brand-primary rounded-lg shadow-2xl border border-brand-secondary z-50">
-            <div className="flex justify-between items-center p-3 border-b border-brand-secondary">
-                <h4 className="font-semibold text-brand-light">การแจ้งเตือน</h4>
+        <div className="absolute top-full right-0 mt-2 w-80 max-w-sm bg-primary rounded-lg shadow-2xl border border-border z-50">
+            <div className="flex justify-between items-center p-3 border-b border-border">
+                <h4 className="font-semibold text-text-main">การแจ้งเตือน</h4>
                 {notifications.length > 0 && (
-                    <button onClick={onClearAll} className="text-xs text-brand-accent hover:underline">
+                    <button onClick={onClearAll} className="text-xs text-accent hover:underline">
                         ล้างทั้งหมด
                     </button>
                 )}
             </div>
             <div className="max-h-96 overflow-y-auto">
                 {notifications.length === 0 ? (
-                    <div className="text-center py-10 px-4 text-brand-text">
+                    <div className="text-center py-10 px-4 text-text-muted">
                         <p className="text-sm">ไม่มีการแจ้งเตือนในขณะนี้</p>
                     </div>
                 ) : (
                     <ul>
                         {notifications.map(notif => (
-                            <li key={notif.id} className="border-b border-brand-secondary last:border-b-0 hover:bg-brand-secondary/50 transition-colors">
+                            <li key={notif.id} className="border-b border-border last:border-b-0 hover:bg-secondary transition-colors">
                                 <div className="p-3 flex gap-3">
                                     <NotificationTypeIcon type={notif.type} />
                                     <div>
-                                        <p className="text-sm text-brand-light leading-snug">{notif.message}</p>
-                                        <p className="text-xs text-brand-text mt-1">{timeAgo(notif.timestamp)}</p>
+                                        <p className="text-sm text-text-main leading-snug">{notif.message}</p>
+                                        <p className="text-xs text-text-muted mt-1">{timeAgo(notif.timestamp)}</p>
                                     </div>
                                 </div>
                             </li>

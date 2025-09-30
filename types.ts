@@ -127,6 +127,23 @@ export type PayrollData = Record<string, {
 }>;
 
 
+// Task Management Type
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate: string; // YYYY-MM-DD
+  assigneeId?: string; // Link to Employee
+  relatedRoomId?: string; // Link to Room
+  status: 'To Do' | 'In Progress' | 'Done' | 'Cancelled';
+  priority: 'Low' | 'Medium' | 'High';
+
+  // For display purposes
+  assignee?: Employee;
+  room?: Room;
+}
+
+
 // Legacy type, can be removed later
 export interface StayRecord {
   seq: number;

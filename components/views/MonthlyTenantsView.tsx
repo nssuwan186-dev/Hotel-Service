@@ -92,34 +92,34 @@ const MonthlyTenantsView: React.FC<MonthlyTenantsViewProps> = ({ tenants, meterR
     return (
         <div>
             <div className="flex justify-end items-center mb-6">
-                <button onClick={onAdd} className="bg-brand-accent text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90">+ เพิ่มผู้เช่าใหม่</button>
+                <button onClick={onAdd} className="bg-accent text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90">+ เพิ่มผู้เช่าใหม่</button>
             </div>
             
             {/* Tenants List Table */}
-            <div className="bg-brand-primary p-6 rounded-lg shadow-lg">
-                <h4 className="font-semibold text-xl text-brand-light mb-4">รายชื่อผู้เช่าปัจจุบัน</h4>
-                <div className="">
+            <div className="bg-primary p-4 sm:p-6 rounded-lg shadow-lg border border-border">
+                <h4 className="font-semibold text-xl text-text-main mb-4">รายชื่อผู้เช่าปัจจุบัน</h4>
+                <div className="overflow-x-auto">
                     <table className="w-full text-left whitespace-nowrap text-sm">
-                        <thead className="hidden md:table-header-group border-b border-brand-secondary">
+                        <thead className="hidden md:table-header-group border-b border-border">
                             <tr>
-                                <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-brand-text tracking-wider">ชื่อ-สกุล</th>
-                                <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-brand-text tracking-wider">ห้อง</th>
-                                <th className="p-3 font-semibold text-right text-xs sm:text-sm uppercase text-brand-text tracking-wider">ค่าเช่า (บาท)</th>
-                                <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">จัดการ</th>
+                                <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-text-muted tracking-wider">ชื่อ-สกุล</th>
+                                <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-text-muted tracking-wider">ห้อง</th>
+                                <th className="p-3 font-semibold text-right text-xs sm:text-sm uppercase text-text-muted tracking-wider">ค่าเช่า (บาท)</th>
+                                <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-text-muted tracking-wider">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody className="block md:table-row-group">
                             {tenants.map((tenant) => (
-                                <tr key={tenant.id} className="block p-4 mb-4 bg-brand-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-brand-primary last:md:border-b-0">
-                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3"><span className="font-semibold text-brand-text md:hidden">ชื่อ-สกุล</span><span className="font-medium">{tenant.name}</span></td>
-                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3"><span className="font-semibold text-brand-text md:hidden">ห้อง</span><span>{tenant.roomNumber}</span></td>
-                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3 md:text-right"><span className="font-semibold text-brand-text md:hidden">ค่าเช่า</span><span>{tenant.rent.toLocaleString()}</span></td>
+                                <tr key={tenant.id} className="block p-4 mb-4 bg-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-border last:md:border-b-0">
+                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3"><span className="font-semibold text-text-muted md:hidden">ชื่อ-สกุล</span><span className="font-medium">{tenant.name}</span></td>
+                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3"><span className="font-semibold text-text-muted md:hidden">ห้อง</span><span>{tenant.roomNumber}</span></td>
+                                    <td className="flex justify-between items-center py-1 md:table-cell md:p-3 md:text-right"><span className="font-semibold text-text-muted md:hidden">ค่าเช่า</span><span>{tenant.rent.toLocaleString()}</span></td>
                                     <td className="py-2 md:table-cell md:p-3">
                                         <div className="flex justify-end items-center gap-2 mt-2 md:mt-0 md:justify-center">
                                             <button onClick={() => handleSelectTenantForMeters(tenant)} className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md transition-colors">
                                                 จัดการมิเตอร์
                                             </button>
-                                            <button onClick={() => onEdit(tenant)} className="p-2 text-yellow-400 hover:text-yellow-300 transition-colors"><EditIcon /></button>
+                                            <button onClick={() => onEdit(tenant)} className="p-2 text-yellow-500 hover:text-yellow-400 transition-colors"><EditIcon /></button>
                                             <button onClick={() => onDelete(tenant)} className="p-2 text-red-500 hover:text-red-400 transition-colors"><TrashIcon /></button>
                                         </div>
                                     </td>
@@ -132,44 +132,44 @@ const MonthlyTenantsView: React.FC<MonthlyTenantsViewProps> = ({ tenants, meterR
 
             {/* Meter Management Section */}
             {selectedTenant && (
-                 <div id="meter-management-section" className="bg-brand-primary p-6 rounded-lg shadow-lg mt-8">
+                 <div id="meter-management-section" className="bg-primary p-4 sm:p-6 rounded-lg shadow-lg mt-8 border border-border">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                             <h4 className="font-semibold text-xl text-brand-light">จัดการมิเตอร์สำหรับ: <span className="text-brand-accent">{selectedTenant.name}</span></h4>
-                             <p className="text-brand-text">ห้อง {selectedTenant.roomNumber}</p>
+                             <h4 className="font-semibold text-xl text-text-main">จัดการมิเตอร์สำหรับ: <span className="text-accent">{selectedTenant.name}</span></h4>
+                             <p className="text-text-muted">ห้อง {selectedTenant.roomNumber}</p>
                         </div>
-                        <button onClick={() => setSelectedTenant(null)} className="text-2xl text-brand-text hover:text-brand-light">&times;</button>
+                        <button onClick={() => setSelectedTenant(null)} className="text-2xl text-text-muted hover:text-text-main">&times;</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <FormSelect label="เลือกปี (พ.ศ.)" value={selectedYear.toString()} onChange={e => setSelectedYear(parseInt(e.target.value, 10))} options={yearOptions} />
                     </div>
 
-                    <div className="">
+                    <div className="overflow-x-auto">
                         <table className="w-full text-left whitespace-nowrap text-sm">
-                            <thead className="hidden md:table-header-group border-b border-brand-secondary">
+                            <thead className="hidden md:table-header-group border-b border-border">
                                 <tr>
-                                    <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-brand-text tracking-wider">เดือน</th>
-                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">มิเตอร์น้ำ (หน่วย)</th>
-                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">มิเตอร์ไฟ (หน่วย)</th>
-                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-brand-text tracking-wider">ดำเนินการ</th>
+                                    <th className="p-3 font-semibold text-xs sm:text-sm uppercase text-text-muted tracking-wider">เดือน</th>
+                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-text-muted tracking-wider">มิเตอร์น้ำ (หน่วย)</th>
+                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-text-muted tracking-wider">มิเตอร์ไฟ (หน่วย)</th>
+                                    <th className="p-3 font-semibold text-center text-xs sm:text-sm uppercase text-text-muted tracking-wider">ดำเนินการ</th>
                                 </tr>
                             </thead>
                             <tbody className="block md:table-row-group">
                                 {months.map((monthName, index) => {
                                     const reading = currentReadings[selectedYear.toString()]?.[index.toString()] || { water: null, electricity: null };
                                     return (
-                                        <tr key={index} className="block p-4 mb-4 bg-brand-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-brand-primary last:md:border-b-0">
-                                            <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">เดือน</span><span className="font-medium">{monthName}</span></td>
+                                        <tr key={index} className="block p-4 mb-4 bg-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-border last:md:border-b-0">
+                                            <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-text-muted md:hidden">เดือน</span><span className="font-medium">{monthName}</span></td>
                                             <td className="block py-2 md:table-cell md:p-2">
-                                                <label className="font-semibold text-brand-text md:hidden mb-1 block">มิเตอร์น้ำ (หน่วย)</label>
-                                                <input type="number" className="w-full bg-brand-primary text-brand-light p-2 rounded-md text-center md:bg-brand-secondary" value={reading.water ?? ''} onChange={e => handleReadingChange(index, 'water', e.target.value)} />
+                                                <label className="font-semibold text-text-muted md:hidden mb-1 block">มิเตอร์น้ำ (หน่วย)</label>
+                                                <input type="number" className="w-full bg-primary text-text-main p-2 rounded-md text-center border border-border md:bg-secondary" value={reading.water ?? ''} onChange={e => handleReadingChange(index, 'water', e.target.value)} />
                                             </td>
                                             <td className="block py-2 md:table-cell md:p-2">
-                                                 <label className="font-semibold text-brand-text md:hidden mb-1 block">มิเตอร์ไฟ (หน่วย)</label>
-                                                <input type="number" className="w-full bg-brand-primary text-brand-light p-2 rounded-md text-center md:bg-brand-secondary" value={reading.electricity ?? ''} onChange={e => handleReadingChange(index, 'electricity', e.target.value)} />
+                                                 <label className="font-semibold text-text-muted md:hidden mb-1 block">มิเตอร์ไฟ (หน่วย)</label>
+                                                <input type="number" className="w-full bg-primary text-text-main p-2 rounded-md text-center border border-border md:bg-secondary" value={reading.electricity ?? ''} onChange={e => handleReadingChange(index, 'electricity', e.target.value)} />
                                             </td>
                                             <td className="block pt-3 md:table-cell md:p-2 md:text-center">
-                                                <button onClick={() => handlePrintInvoice(index)} className="flex items-center justify-center gap-2 w-full text-sm bg-brand-primary hover:bg-opacity-80 text-brand-light font-bold py-2 px-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed md:bg-brand-secondary" disabled={reading.water === null || reading.electricity === null}>
+                                                <button onClick={() => handlePrintInvoice(index)} className="flex items-center justify-center gap-2 w-full text-sm bg-primary hover:bg-border text-text-main font-bold py-2 px-3 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-border md:bg-secondary" disabled={reading.water === null || reading.electricity === null}>
                                                     <PrintIcon /> พิมพ์ใบแจ้งหนี้
                                                 </button>
                                             </td>
@@ -180,7 +180,7 @@ const MonthlyTenantsView: React.FC<MonthlyTenantsViewProps> = ({ tenants, meterR
                         </table>
                     </div>
                     <div className="mt-6 text-right">
-                        <button onClick={handleSaveChanges} className="bg-brand-accent text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90">
+                        <button onClick={handleSaveChanges} className="bg-accent text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90">
                             บันทึกการเปลี่ยนแปลงมิเตอร์
                         </button>
                     </div>

@@ -1,4 +1,5 @@
 
+
 import React, { useMemo } from 'react';
 import { AdminBooking } from '../../types';
 import { formatThaiDate } from '../../services/utils';
@@ -18,28 +19,28 @@ const CheckInListView: React.FC<CheckInListViewProps> = ({ bookings, onEdit, onC
     return (
         <div>
             {currentStays.length === 0 ? (
-                <div className="text-center p-10 bg-brand-primary rounded-lg text-brand-text">ไม่มีผู้เข้าพักในขณะนี้</div>
+                <div className="text-center p-10 bg-primary rounded-xl text-text-muted border border-border">ไม่มีผู้เข้าพักในขณะนี้</div>
             ) : (
                 <div className="space-y-3">
                     {currentStays.map(b => (
-                        <div key={b.id} className="bg-brand-primary rounded-lg shadow-lg p-3 flex justify-between items-center">
-                            <div className="grid grid-cols-[max-content,1fr] items-center gap-x-4 gap-y-1 text-sm">
-                                <div className="font-semibold text-brand-text text-xs">ลูกค้า</div>
-                                <div className="text-brand-light font-medium">{b.guest?.fullName}</div>
+                         <div key={b.id} className="bg-primary rounded-xl shadow-md p-4 border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="grid grid-cols-[max-content,1fr] items-center gap-x-4 gap-y-1 text-sm w-full">
+                                <div className="font-semibold text-text-muted text-xs">ลูกค้า</div>
+                                 <div className="text-text-main font-semibold text-base">{b.guest?.fullName}</div>
 
-                                <div className="font-semibold text-brand-text text-xs">ห้อง</div>
-                                <div className="text-brand-light font-medium">{b.room?.roomNumber}</div>
+                                <div className="font-semibold text-text-muted text-xs">ห้อง</div>
+                                <div className="text-text-main font-medium">{b.room?.roomNumber} ({b.room?.roomType})</div>
 
-                                <div className="font-semibold text-brand-text text-xs">วันเวลา</div>
-                                <div className="text-brand-light">{formatThaiDate(b.checkIn)} - {formatThaiDate(b.checkOut)}</div>
+                                <div className="font-semibold text-text-muted text-xs">วันเวลา</div>
+                                <div className="text-text-main">{formatThaiDate(b.checkIn)} - {formatThaiDate(b.checkOut)}</div>
                             </div>
-                            <div className="flex items-center gap-2 ml-4">
-                                <button onClick={() => onEdit(b)} className="text-yellow-400 hover:text-yellow-300 p-2 rounded-md hover:bg-brand-secondary transition-colors" title="แก้ไขการจอง">
+                            <div className="flex items-center gap-2 ml-4 self-end sm:self-center">
+                                <button onClick={() => onEdit(b)} className="text-yellow-500 hover:text-yellow-400 p-2 rounded-lg hover:bg-secondary transition-colors" title="แก้ไขการจอง">
                                     <EditIcon />
                                 </button>
                                 <button
                                     onClick={() => onCheckOut(b.id)}
-                                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm whitespace-nowrap"
+                                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm whitespace-nowrap"
                                 >
                                     เช็คเอาท์
                                 </button>

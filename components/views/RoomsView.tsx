@@ -62,18 +62,18 @@ const RoomsView: React.FC<{ rooms: Room[], bookings: AdminBooking[] }> = ({ room
         <div>
             <div className="flex justify-end items-center mb-6">
                 <div className="flex items-center gap-2">
-                    <button onClick={goToPreviousMonth} className="px-3 py-1 sm:px-4 sm:py-2 bg-brand-primary rounded-md hover:bg-opacity-80">{"<"}</button>
+                    <button onClick={goToPreviousMonth} className="px-3 py-1 sm:px-4 sm:py-2 bg-primary rounded-md hover:bg-opacity-80 border border-border">{"<"}</button>
                     <span className="w-40 sm:w-48 text-center text-sm sm:text-base font-semibold">
                         {currentDate.toLocaleString('th-TH', { month: 'long', year: 'numeric' })}
                     </span>
-                    <button onClick={goToNextMonth} className="px-3 py-1 sm:px-4 sm:py-2 bg-brand-primary rounded-md hover:bg-opacity-80">{">"}</button>
+                    <button onClick={goToNextMonth} className="px-3 py-1 sm:px-4 sm:py-2 bg-primary rounded-md hover:bg-opacity-80 border border-border">{">"}</button>
                 </div>
             </div>
 
-            <div className="bg-brand-primary rounded-lg grid grid-cols-7 border-t border-l border-brand-secondary">
+            <div className="bg-primary rounded-lg grid grid-cols-7 border-t border-l border-border">
                 {/* Weekday Headers */}
                 {weekDayLabels.map(label => (
-                    <div key={label} className="p-2 text-center font-semibold text-brand-text border-r border-b border-brand-secondary bg-brand-secondary/30 text-xs sm:text-sm">
+                    <div key={label} className="p-2 text-center font-semibold text-text-muted border-r border-b border-border bg-secondary text-xs sm:text-sm">
                         {label}
                     </div>
                 ))}
@@ -87,12 +87,12 @@ const RoomsView: React.FC<{ rooms: Room[], bookings: AdminBooking[] }> = ({ room
                     return (
                         <div 
                             key={isoDate} 
-                            className="relative p-1 min-h-[120px] border-r border-b border-brand-secondary"
+                            className="relative p-1 min-h-[120px] border-r border-b border-border"
                         >
                             <span className={`
                                 flex items-center justify-center w-6 h-6 text-sm font-semibold
-                                ${isToday ? 'bg-brand-accent text-white rounded-full' : ''}
-                                ${isCurrentMonth ? 'text-brand-light' : 'text-brand-text/30'}
+                                ${isToday ? 'bg-accent text-white rounded-full' : ''}
+                                ${isCurrentMonth ? 'text-text-main' : 'text-text-muted/30'}
                             `}>
                                 {date.getDate()}
                             </span>
@@ -110,7 +110,7 @@ const RoomsView: React.FC<{ rooms: Room[], bookings: AdminBooking[] }> = ({ room
                                     </div>
                                 ))}
                                 {dayBookings.length > 3 && (
-                                    <p className="text-xs text-center text-brand-text mt-1">
+                                    <p className="text-xs text-center text-text-muted mt-1">
                                         + {dayBookings.length - 3} รายการ
                                     </p>
                                 )}

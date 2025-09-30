@@ -1,33 +1,33 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+
+
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { PayrollCalculationRow } from '../../types';
 import * as adminService from '../../services/adminService';
 import { FormSelect } from '../AdminPanel';
 import Spinner from '../common/Spinner';
 import { PrintIcon } from '../icons/PrintIcon';
 import { thaiMonthsFull } from '../../services/utils';
-import { generatePayrollPDF } from '../../services/payrollPdfService';
+import { generatePayrollPDF, generatePayrollSummaryPDF } from '../../services/payrollPdfService';
 
 const PayrollInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
     <input 
         type="number"
-        className="w-full bg-brand-primary text-brand-light p-1.5 rounded-md text-right border border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-accent"
+        className="w-full bg-primary text-text-main p-1.5 rounded-md text-right border border-border focus:outline-none focus:ring-1 focus:ring-accent"
         {...props}
     />
 );
 
 const PayrollDetailRow: React.FC<{ label: string, children: React.ReactNode, isLarge?: boolean, isInput?: boolean }> = ({ label, children, isLarge = false, isInput = false }) => (
     <div className={`flex justify-between items-center py-1 ${isLarge ? 'py-2' : ''}`}>
-        <p className="text-brand-text">{label}</p>
+        <p className="text-text-muted">{label}</p>
         <div className={isInput ? 'w-28' : ''}>{children}</div>
     </div>
 );
 
-
-const PayrollTable: React.FC<{
+const PayrollContent: React.FC<{
     data: PayrollCalculationRow[];
     onDataChange: (index: number, field: keyof PayrollCalculationRow, value: any) => void;
-    onPrint: () => void;
-}> = ({ data, onDataChange, onPrint }) => {
+}> = ({ data, onDataChange }) => {
 
     const calculateRow = (row: PayrollCalculationRow) => {
         const base = Number(row.baseRate) || 0;
@@ -51,65 +51,58 @@ const PayrollTable: React.FC<{
     };
 
     return (
-        <div className="bg-brand-primary p-4 sm:p-6 rounded-lg shadow-lg">
-            <div className="flex justify-end items-center mb-4">
-                <button onClick={onPrint} className="flex items-center gap-2 text-sm bg-brand-accent hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-md transition-colors">
-                    <PrintIcon /> พิมพ์สรุป
-                </button>
-            </div>
-             <div className="space-y-4">
-                {data.map((row, index) => {
-                    const { totalIncome, netPay } = calculateRow(row);
-                    return (
-                        <div key={row.employeeId} className="bg-brand-secondary p-4 rounded-lg">
-                            <div className="text-center mb-3 pb-3 border-b border-brand-primary/50">
-                                <p className="font-semibold text-brand-light text-lg">{row.name}</p>
-                                <p className="text-sm text-brand-text">{row.position}</p>
-                            </div>
-
-                            <div className="space-y-1.5 text-sm">
-                                <PayrollDetailRow label="อัตราจ้าง">
-                                    <span>{row.baseRate.toLocaleString()} <span className="text-xs text-brand-text">/ {row.employmentType === 'monthly' ? 'เดือน' : 'วัน'}</span></span>
-                                </PayrollDetailRow>
-                                <PayrollDetailRow label="รายได้อื่น" isInput>
-                                    <PayrollInput value={row.otherIncome ?? ''} onChange={e => onDataChange(index, 'otherIncome', e.target.value)} placeholder="0.00" />
-                                </PayrollDetailRow>
-                                {row.employmentType === 'daily' && (
-                                    <PayrollDetailRow label="วันทำงาน" isInput>
-                                        <PayrollInput value={row.workDays ?? ''} onChange={e => onDataChange(index, 'workDays', e.target.value)} placeholder="0" />
-                                    </PayrollDetailRow>
-                                )}
-                                <PayrollDetailRow label="รวมเงิน">
-                                    <span className="font-semibold text-green-400">{totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                                </PayrollDetailRow>
-                                
-                                <hr className="border-t border-brand-primary/50 !my-3" />
-
-                                <PayrollDetailRow label="หัก ปกส." isInput>
-                                    <PayrollInput value={row.deductionSocialSecurity ?? ''} onChange={e => onDataChange(index, 'deductionSocialSecurity', e.target.value)} placeholder="0.00" />
-                                </PayrollDetailRow>
-                                <PayrollDetailRow label="หัก ขาด/ลา" isInput>
-                                    <PayrollInput value={row.deductionAbsence ?? ''} onChange={e => onDataChange(index, 'deductionAbsence', e.target.value)} placeholder="0.00" />
-                                </PayrollDetailRow>
-                                <PayrollDetailRow label="หัก อื่นๆ" isInput>
-                                    <PayrollInput value={row.deductionOther ?? ''} onChange={e => onDataChange(index, 'deductionOther', e.target.value)} placeholder="0.00" />
-                                </PayrollDetailRow>
-
-                                <hr className="border-t border-brand-primary/50 !my-3" />
-                                
-                                <PayrollDetailRow label="ยอดจ่ายจริง" isLarge>
-                                    <span className="font-bold text-yellow-400 text-xl">{netPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                                </PayrollDetailRow>
-                            </div>
+        <div className="space-y-4">
+            {data.map((row, index) => {
+                const { totalIncome, netPay } = calculateRow(row);
+                return (
+                    <div key={row.employeeId} className="bg-secondary p-4 rounded-lg border border-border">
+                        <div className="text-center mb-3 pb-3 border-b border-border">
+                            <p className="font-semibold text-text-main text-lg">{row.name}</p>
+                            <p className="text-sm text-text-muted">{row.position}</p>
                         </div>
-                    );
-                })}
-            </div>
+
+                        <div className="space-y-1.5 text-sm">
+                            <PayrollDetailRow label="อัตราจ้าง">
+                                <span>{row.baseRate.toLocaleString()} <span className="text-xs text-text-muted">/ {row.employmentType === 'monthly' ? 'เดือน' : 'วัน'}</span></span>
+                            </PayrollDetailRow>
+                            <PayrollDetailRow label="รายได้อื่น" isInput>
+                                <PayrollInput value={row.otherIncome ?? ''} onChange={e => onDataChange(index, 'otherIncome', e.target.value)} placeholder="0.00" />
+                            </PayrollDetailRow>
+                            {row.employmentType === 'daily' && (
+                                <PayrollDetailRow label="วันทำงาน" isInput>
+                                    <PayrollInput value={row.workDays ?? ''} onChange={e => onDataChange(index, 'workDays', e.target.value)} placeholder="0" />
+                                </PayrollDetailRow>
+                            )}
+                            <PayrollDetailRow label="รวมเงิน">
+                                <span className="font-semibold text-green-500">{totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            </PayrollDetailRow>
+                            
+                            <hr className="border-t border-border !my-3" />
+
+                            <PayrollDetailRow label="หัก ปกส." isInput>
+                                <PayrollInput value={row.deductionSocialSecurity ?? ''} onChange={e => onDataChange(index, 'deductionSocialSecurity', e.target.value)} placeholder="0.00" />
+                            </PayrollDetailRow>
+                            <PayrollDetailRow label="หัก ขาด/ลา" isInput>
+                                <PayrollInput value={row.deductionAbsence ?? ''} onChange={e => onDataChange(index, 'deductionAbsence', e.target.value)} placeholder="0.00" />
+                            </PayrollDetailRow>
+                            <PayrollDetailRow label="หัก อื่นๆ" isInput>
+                                <PayrollInput value={row.deductionOther ?? ''} onChange={e => onDataChange(index, 'deductionOther', e.target.value)} placeholder="0.00" />
+                            </PayrollDetailRow>
+
+                            <hr className="border-t border-border !my-3" />
+                            
+                            <PayrollDetailRow label="ยอดจ่ายจริง" isLarge>
+                                <span className="font-bold text-yellow-400 text-xl">{netPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            </PayrollDetailRow>
+                        </div>
+                    </div>
+                );
+            })}
         </div>
     );
 }
 
-const MonthlySummaryTable: React.FC<{
+interface MonthlySummaryTableProps {
     summaryData: {
         employeeId: string;
         name: string;
@@ -120,61 +113,83 @@ const MonthlySummaryTable: React.FC<{
         totalNetPay: number;
     }[];
     monthName: string;
-}> = ({ summaryData, monthName }) => {
+    onPrintSummary: () => void;
+}
+
+const MonthlySummaryTable: React.FC<MonthlySummaryTableProps> = ({ summaryData, monthName, onPrintSummary }) => {
+    const totals = useMemo(() => {
+        return summaryData.reduce((acc, row) => {
+            acc.netPayPeriod1 += row.netPayPeriod1;
+            acc.netPayPeriod2 += row.netPayPeriod2;
+            acc.totalNetPay += row.totalNetPay;
+            return acc;
+        }, { netPayPeriod1: 0, netPayPeriod2: 0, totalNetPay: 0 });
+    }, [summaryData]);
 
     return (
-         <div className="bg-brand-primary p-4 sm:p-6 rounded-lg shadow-lg">
-            <h4 className="font-semibold text-xl text-brand-light mb-4">สรุปยอดจ่ายเงินเดือน ({monthName})</h4>
+         <div className="bg-primary p-4 sm:p-6 rounded-lg shadow-lg border border-border">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                <h4 className="font-semibold text-xl text-text-main">สรุปยอดจ่ายเงินเดือน ({monthName})</h4>
+                 <button 
+                    onClick={onPrintSummary} 
+                    className="flex items-center gap-2 text-sm bg-accent hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-md transition-colors self-end sm:self-center"
+                >
+                    <PrintIcon /> พิมพ์สรุป
+                </button>
+            </div>
             <div className="space-y-4">
                 {summaryData.map((row) => (
-                    <div key={row.employeeId} className="bg-brand-secondary p-4 rounded-lg">
-                        <div className="text-center mb-3 pb-3 border-b border-brand-primary/50">
-                            <p className="font-semibold text-brand-light text-lg">{row.name}</p>
-                            <p className="text-sm text-brand-text">{row.position}</p>
+                    <div key={row.employeeId} className="bg-secondary p-4 rounded-lg border border-border">
+                        <div className="text-center mb-3 pb-3 border-b border-border">
+                            <p className="font-semibold text-text-main text-lg">{row.name}</p>
+                            <p className="text-sm text-text-muted">{row.position}</p>
                         </div>
                         <div className="space-y-1.5 text-sm">
-                             <PayrollDetailRow label="เลขที่บัญชี">
-                                <span>{`${row.accountInfo.bank} ${row.accountInfo.accountNumber}`}</span>
+                            <PayrollDetailRow label="ยอดจ่าย (รอบ 1-15)">
+                                <span>{row.netPayPeriod1.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             </PayrollDetailRow>
-                             <PayrollDetailRow label="ยอดจ่าย (รอบ 1)">
-                                <span className="font-semibold text-yellow-400">{row.netPayPeriod1.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                             <PayrollDetailRow label="ยอดจ่าย (รอบ 16 - สิ้นเดือน)">
+                                <span>{row.netPayPeriod2.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             </PayrollDetailRow>
-                             <PayrollDetailRow label="ยอดจ่าย (รอบ 2)">
-                                <span className="font-semibold text-yellow-400">{row.netPayPeriod2.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                            </PayrollDetailRow>
-                            <hr className="border-t border-brand-primary/50 !my-3" />
-                             <PayrollDetailRow label="รวมยอดจ่าย" isLarge={true}>
-                                <span className="font-bold text-green-400 text-xl">{row.totalNetPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                             <PayrollDetailRow label="รวมยอดจ่ายทั้งเดือน" isLarge>
+                                <span className="font-bold text-yellow-400 text-xl">{row.totalNetPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                             </PayrollDetailRow>
                         </div>
                     </div>
                 ))}
             </div>
+            <div className="mt-4 pt-4 border-t border-border font-bold bg-secondary p-4 rounded-lg">
+                <PayrollDetailRow label="รวมจ่ายรอบ 1">
+                    <span>{totals.netPayPeriod1.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                </PayrollDetailRow>
+                <PayrollDetailRow label="รวมจ่ายรอบ 2">
+                     <span>{totals.netPayPeriod2.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                </PayrollDetailRow>
+                 <PayrollDetailRow label="รวมจ่ายทั้งเดือน" isLarge>
+                    <span className="text-yellow-400 text-xl">{totals.totalNetPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                </PayrollDetailRow>
+            </div>
         </div>
-    )
-}
+    );
+};
+
 
 const PayrollView: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-    const [period1Data, setPeriod1Data] = useState<PayrollCalculationRow[]>([]);
-    const [period2Data, setPeriod2Data] = useState<PayrollCalculationRow[]>([]);
-    const [activeSubPeriod, setActiveSubPeriod] = useState<'period1' | 'period2'>('period1');
-    const [mainActiveTab, setMainActiveTab] = useState<'payslip' | 'summary'>('payslip');
-
-    const yearOptions = Array.from({ length: 5 }, (_, i) => ({ value: (new Date().getFullYear() - i).toString(), label: (new Date().getFullYear() - i + 543).toString() }));
-    const monthOptions = thaiMonthsFull.map((m, i) => ({ value: i.toString(), label: m }));
+    const [activeTab, setActiveTab] = useState<'period1' | 'period2' | 'summary'>('period1');
+    const [payrollData, setPayrollData] = useState<{ period1: PayrollCalculationRow[], period2: PayrollCalculationRow[] }>({ period1: [], period2: [] });
+    const isSaving = useRef(false);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const data = await adminService.getPayrollData(selectedYear, selectedMonth);
-            setPeriod1Data(data.period1);
-            setPeriod2Data(data.period2);
+            setPayrollData(data);
         } catch (error) {
             console.error("Failed to fetch payroll data:", error);
-            alert("ไม่สามารถโหลดข้อมูลเงินเดือนได้");
+            setPayrollData({ period1: [], period2: [] });
         } finally {
             setLoading(false);
         }
@@ -184,29 +199,31 @@ const PayrollView: React.FC = () => {
         fetchData();
     }, [fetchData]);
 
-    const handlePeriodDataChange = (period: 'period1' | 'period2', index: number, field: keyof PayrollCalculationRow, value: any) => {
-        const updater = period === 'period1' ? setPeriod1Data : setPeriod2Data;
-        updater(prev => {
-            const newData = [...prev];
-            if (value === '') {
-                newData[index] = { ...newData[index], [field]: '' };
-                return newData;
-            }
-            const numValue = parseFloat(value);
-            newData[index] = { ...newData[index], [field]: isNaN(numValue) ? '' : numValue };
-            return newData;
+    const handleDataChange = (index: number, field: keyof PayrollCalculationRow, value: any) => {
+        if (activeTab === 'summary') return;
+        setPayrollData(prev => {
+            const newPeriodData = [...prev[activeTab]];
+            newPeriodData[index] = { ...newPeriodData[index], [field]: value };
+            return { ...prev, [activeTab]: newPeriodData };
         });
     };
-
+    
     const handleSaveChanges = async () => {
-        if(confirm('คุณต้องการบันทึกข้อมูลเงินเดือนสำหรับเดือนนี้ใช่หรือไม่?')) {
-            await adminService.savePayrollData(selectedYear, selectedMonth, { period1: period1Data, period2: period2Data });
+        if (isSaving.current) return;
+        isSaving.current = true;
+        try {
+            await adminService.savePayrollData(selectedYear, selectedMonth, payrollData);
             alert('บันทึกข้อมูลสำเร็จ');
+        } catch (error) {
+            console.error("Failed to save payroll data:", error);
+            alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        } finally {
+            isSaving.current = false;
         }
     };
-
-    const getFullRowData = (row: PayrollCalculationRow) => {
-         const base = Number(row.baseRate) || 0;
+    
+    const calculateNetPay = (row: PayrollCalculationRow) => {
+        const base = Number(row.baseRate) || 0;
         const otherIncome = Number(row.otherIncome || 0);
         let totalIncome = 0;
 
@@ -216,139 +233,125 @@ const PayrollView: React.FC = () => {
             const workDays = Number(row.workDays || 0);
             totalIncome = (base * workDays) + otherIncome;
         }
+
         const deductionSocial = Number(row.deductionSocialSecurity || 0);
         const deductionAbsence = Number(row.deductionAbsence || 0);
         const deductionOther = Number(row.deductionOther || 0);
         const totalDeductions = deductionSocial + deductionAbsence + deductionOther;
-        const netPay = totalIncome - totalDeductions;
-        return { ...row, totalIncome, netPay };
+        return totalIncome - totalDeductions;
     };
 
-    const handlePrint = (period: 'period1' | 'period2') => {
-        const monthName = thaiMonthsFull[selectedMonth];
-        const yearBE = selectedYear + 543;
+    const handlePrintPeriod = () => {
+        if (activeTab === 'summary') return;
+        const periodTitle = `ใบจ่ายเงินเดือน ${activeTab === 'period1' ? 'รอบวันที่ 1-15' : 'รอบวันที่ 16 - สิ้นเดือน'} ${thaiMonthsFull[selectedMonth]} ${selectedYear + 543}`;
         
-        if(period === 'period1') {
-            generatePayrollPDF({
-                periodTitle: `ค่าจ้างระหว่างวันที่ 1-15 ${monthName} ${yearBE}`,
-                rows: period1Data.map(getFullRowData)
+        const rowsWithTotals = payrollData[activeTab].map(row => {
+            const base = Number(row.baseRate) || 0;
+            const otherIncome = Number(row.otherIncome || 0);
+            let totalIncome = 0;
+
+            if (row.employmentType === 'monthly') {
+                totalIncome = base + otherIncome;
+            } else {
+                const workDays = Number(row.workDays || 0);
+                totalIncome = (base * workDays) + otherIncome;
+            }
+            const netPay = calculateNetPay(row);
+            return {...row, totalIncome, netPay };
+        });
+        
+        generatePayrollPDF({ periodTitle, rows: rowsWithTotals });
+    };
+
+    const summaryData = useMemo(() => {
+        const employeeMap = new Map<string, any>();
+
+        payrollData.period1.forEach(row => {
+            employeeMap.set(row.employeeId, {
+                ...row,
+                netPayPeriod1: calculateNetPay(row),
+                netPayPeriod2: 0,
             });
-        } else {
-            const lastDay = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-            generatePayrollPDF({
-                periodTitle: `ค่าจ้างระหว่างวันที่ 16-${lastDay} ${monthName} ${yearBE}`,
-                rows: period2Data.map(getFullRowData)
-            });
-        }
+        });
+
+        payrollData.period2.forEach(row => {
+            const netPay2 = calculateNetPay(row);
+            if (employeeMap.has(row.employeeId)) {
+                employeeMap.get(row.employeeId).netPayPeriod2 = netPay2;
+            } else {
+                employeeMap.set(row.employeeId, {
+                    ...row,
+                    netPayPeriod1: 0,
+                    netPayPeriod2: netPay2,
+                });
+            }
+        });
+
+        const result = Array.from(employeeMap.values());
+        result.forEach(row => {
+            row.totalNetPay = row.netPayPeriod1 + row.netPayPeriod2;
+        });
+
+        return result;
+    }, [payrollData]);
+
+    const handlePrintSummary = () => {
+        generatePayrollSummaryPDF({
+            monthName: thaiMonthsFull[selectedMonth],
+            yearBE: selectedYear + 543,
+            summaryData: summaryData,
+        });
     };
     
-    const monthlySummaryData = useMemo(() => {
-        if (period1Data.length === 0) return [];
+    const yearOptions = Array.from({ length: 5 }, (_, i) => ({ value: (new Date().getFullYear() - i).toString(), label: (new Date().getFullYear() - i + 543).toString() }));
+    const monthOptions = thaiMonthsFull.map((name, index) => ({ value: index.toString(), label: name }));
 
-        return period1Data.map((p1Row) => {
-            const p2Row = period2Data.find(p2 => p2.employeeId === p1Row.employeeId);
-            
-            if (!p2Row) return null; 
-
-            const p1Calcs = getFullRowData(p1Row);
-            const p2Calcs = getFullRowData(p2Row);
-
-            return {
-                employeeId: p1Row.employeeId,
-                name: p1Row.name,
-                position: p1Row.position,
-                accountInfo: p1Row.accountInfo,
-                netPayPeriod1: p1Calcs.netPay,
-                netPayPeriod2: p2Calcs.netPay,
-                totalNetPay: p1Calcs.netPay + p2Calcs.netPay,
-            };
-        }).filter(Boolean) as any[];
-    }, [period1Data, period2Data]);
-
-
-    if (loading) {
-        return <div className="flex justify-center items-center h-full"><Spinner size="lg" /></div>;
-    }
-    
-    const tabBaseClass = "px-4 py-3 text-sm font-medium border-b-2 transition-colors";
-    const activeTabClass = "border-brand-accent text-brand-accent";
-    const inactiveTabClass = "border-transparent text-brand-text hover:border-brand-text/50 hover:text-brand-light";
+    const TabButton: React.FC<{ tabId: 'period1' | 'period2' | 'summary'; label: string }> = ({ tabId, label }) => (
+        <button
+            onClick={() => setActiveTab(tabId)}
+            className={`flex-1 py-3 text-sm font-semibold rounded-md transition-colors ${
+                activeTab === tabId
+                    ? 'bg-accent text-white shadow-md'
+                    : 'bg-secondary text-text-muted hover:bg-border'
+            }`}
+        >
+            {label}
+        </button>
+    );
 
     return (
-        <div>
-            <div className="flex justify-end items-center mb-6">
-                <div className="flex items-center gap-2">
-                    <FormSelect label="" value={selectedMonth.toString()} onChange={e => setSelectedMonth(parseInt(e.target.value))} options={monthOptions} />
-                    <FormSelect label="" value={selectedYear.toString()} onChange={e => setSelectedYear(parseInt(e.target.value))} options={yearOptions} />
+        <div className="space-y-6">
+            <div className="bg-primary p-4 rounded-lg shadow-lg border border-border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <FormSelect label="เลือกปี (พ.ศ.)" value={selectedYear.toString()} onChange={e => setSelectedYear(parseInt(e.target.value, 10))} options={yearOptions} />
+                    <FormSelect label="เลือกเดือน" value={selectedMonth.toString()} onChange={e => setSelectedMonth(parseInt(e.target.value, 10))} options={monthOptions} />
+                </div>
+                <div className="flex bg-primary rounded-lg p-1 space-x-1">
+                    <TabButton tabId="period1" label="รอบวันที่ 1-15" />
+                    <TabButton tabId="period2" label="รอบวันที่ 16 - สิ้นเดือน" />
+                    <TabButton tabId="summary" label="สรุปยอดจ่าย" />
                 </div>
             </div>
-            
-            <div className="mb-6 border-b border-brand-primary">
-                <nav className="-mb-px flex space-x-2 sm:space-x-6">
-                    <button 
-                        onClick={() => setMainActiveTab('payslip')} 
-                        className={`${tabBaseClass} ${mainActiveTab === 'payslip' ? activeTabClass : inactiveTabClass}`}
-                    >
-                        สลีปเงินเดือน
-                    </button>
-                    <button 
-                        onClick={() => setMainActiveTab('summary')} 
-                        className={`${tabBaseClass} ${mainActiveTab === 'summary' ? activeTabClass : inactiveTabClass}`}
-                    >
-                        สรุปยอดจ่ายเงินเดือน
-                    </button>
-                </nav>
-            </div>
 
-            {mainActiveTab === 'payslip' && (
-                <>
-                    <div className="mb-6">
-                        <nav className="flex space-x-2 sm:space-x-6">
-                            <button 
-                                onClick={() => setActiveSubPeriod('period1')} 
-                                className={`${tabBaseClass} ${activeSubPeriod === 'period1' ? activeTabClass : inactiveTabClass}`}
-                            >
-                                รอบวันที่ 1-15
+            {loading ? (
+                <div className="flex justify-center items-center py-20"><Spinner size="lg" /></div>
+            ) : (
+                <div>
+                    {activeTab !== 'summary' && (
+                        <div className="flex justify-end items-center mb-4 gap-3">
+                             <button onClick={handleSaveChanges} className="text-sm bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                                บันทึกข้อมูล
                             </button>
-                            <button 
-                                onClick={() => setActiveSubPeriod('period2')} 
-                                className={`${tabBaseClass} ${activeSubPeriod === 'period2' ? activeTabClass : inactiveTabClass}`}
-                            >
-                                รอบวันที่ 16 - สิ้นเดือน
+                             <button onClick={handlePrintPeriod} className="flex items-center gap-2 text-sm bg-accent hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                                <PrintIcon /> พิมพ์รอบนี้
                             </button>
-                        </nav>
-                    </div>
+                        </div>
+                    )}
 
-                    <div className="mb-8">
-                        {activeSubPeriod === 'period1' && (
-                            <PayrollTable 
-                                data={period1Data}
-                                onDataChange={(index, field, value) => handlePeriodDataChange('period1', index, field, value)}
-                                onPrint={() => handlePrint('period1')}
-                            />
-                        )}
-                        {activeSubPeriod === 'period2' && (
-                            <PayrollTable 
-                                data={period2Data}
-                                onDataChange={(index, field, value) => handlePeriodDataChange('period2', index, field, value)}
-                                onPrint={() => handlePrint('period2')}
-                            />
-                        )}
-                    </div>
-                    
-                    <div className="mt-8 text-right">
-                        <button onClick={handleSaveChanges} className="bg-green-600 text-white font-bold py-3 px-8 rounded-md hover:bg-green-700 transition-colors text-lg">
-                            บันทึกการเปลี่ยนแปลงทั้งหมด
-                        </button>
-                    </div>
-                </>
-            )}
-
-            {mainActiveTab === 'summary' && (
-                <MonthlySummaryTable 
-                    summaryData={monthlySummaryData} 
-                    monthName={thaiMonthsFull[selectedMonth]} 
-                />
+                    {activeTab === 'period1' && <PayrollContent data={payrollData.period1} onDataChange={handleDataChange} />}
+                    {activeTab === 'period2' && <PayrollContent data={payrollData.period2} onDataChange={handleDataChange} />}
+                    {activeTab === 'summary' && <MonthlySummaryTable summaryData={summaryData} monthName={thaiMonthsFull[selectedMonth]} onPrintSummary={handlePrintSummary} />}
+                </div>
             )}
         </div>
     );

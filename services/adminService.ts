@@ -1,20 +1,19 @@
-import type { AdminBooking, Expense, Room, Guest, Tenant, MeterReadingsData, UtilityRates, Employee, PayrollCalculationRow } from '../types';
-import * as api from './api';
 
-const isDateInRange = (date: Date, start: Date, endExclusive: Date): boolean => {
-    const d = new Date(date).setHours(0, 0, 0, 0);
-    const s = new Date(start).setHours(0, 0, 0, 0);
-    const e = new Date(endExclusive).setHours(0, 0, 0, 0);
-    return d >= s && d < e;
-};
+
+import type { AdminBooking, Expense, Room, Guest, Tenant, MeterReadingsData, UtilityRates, Employee, PayrollCalculationRow, Task } from '../types';
+import * as api from './api';
 
 // --- API Wrappers ---
 
 export const getRooms = (): Promise<Room[]> => api.fetchRooms();
+export const addRoom = (room: Omit<Room, 'id'>): Promise<Room> => api.createRoom(room);
+export const updateRoom = (id: string, room: Omit<Room, 'id'>): Promise<Room> => api.updateRoom(id, room);
+export const removeRoom = (id: string): Promise<void> => api.deleteRoom(id);
+
 
 export const getBookings = async (): Promise<AdminBooking[]> => {
     const bookings = await api.fetchBookings();
-    const guests = await api.fetchGuests(); // Fetches only active guests
+    const guests = await api.fetchAllGuests(); // FIX: Fetch all guests, not just active ones.
     const rooms = await api.fetchRooms();
 
     const guestMap = new Map(guests.map(g => [g.id, g]));
@@ -89,37 +88,54 @@ export const checkOutBooking = (id: string): Promise<AdminBooking> => api.update
 
 export const getExpensesForDate = (isoDate: string): Promise<Expense[]> => api.fetchExpensesByDate(isoDate);
 export const getAllExpenses = (): Promise<Record<string, Expense[]>> => api.fetchAllExpenses();
+export const addExpense = (expense: Omit<Expense, 'id'>): Promise<Expense> => api.createExpense(expense);
+export const updateExpense = (id: string, data: Omit<Expense, 'id'>): Promise<Expense> => api.updateExpense(id, data);
+export const deleteExpense = (id: string): Promise<void> => api.deleteExpense(id);
 
-export const addExpense = (expense: Omit<Expense, 'id'>): Promise<Expense> => {
-    return api.createExpense(expense);
-};
 
 export const getCleaningData = (): Promise<Record<string, Record<string, boolean>>> => api.fetchCleaningData();
 export const toggleCleaningStatus = (isoDate: string, roomNumber: string): Promise<void> => api.updateCleaningStatus(isoDate, roomNumber);
 
 // Guest Service Functions
 export const getAllGuests = (): Promise<Guest[]> => api.fetchAllGuests();
-export const addGuest = (guest: Omit<Guest, 'id' | 'status'>): Promise<Guest> => api.createGuest(guest);
-export const updateGuest = (id: string, guest: Omit<Guest, 'id' | 'status'>): Promise<Guest> => api.updateGuest(id, guest);
-export const removeGuest = (id: string): Promise<void> => api.removeGuest(id);
+export const addGuest = (data: Omit<Guest, 'id' | 'status'>): Promise<Guest> => api.createGuest(data);
+export const updateGuest = (id: string, data: Omit<Guest, 'id' | 'status'>): Promise<Guest> => api.updateGuest(id, data);
+export const removeGuest = (id: string): Promise<void> => api.deleteGuest(id);
 
 // Tenant Service Functions
-export const getTenants = (): Promise<Tenant[]> => api.fetchTenants();
+export const getTenants = (): Promise<Tenant[]> => api.fetchActiveTenants();
 export const getAllTenants = (): Promise<Tenant[]> => api.fetchAllTenants();
-export const addTenant = (tenant: Omit<Tenant, 'id' | 'status'>): Promise<Tenant> => api.createTenant(tenant);
-export const updateTenant = (id: string, tenant: Omit<Tenant, 'id' | 'status'>): Promise<Tenant> => api.updateTenant(id, tenant);
-export const removeTenant = (id: string): Promise<void> => api.removeTenant(id);
+export const addTenant = (data: Omit<Tenant, 'id' | 'status'>): Promise<Tenant> => api.createTenant(data);
+export const updateTenant = (id: string, data: Omit<Tenant, 'id' | 'status'>): Promise<Tenant> => api.updateTenant(id, data);
+export const removeTenant = (id: string): Promise<void> => api.deleteTenant(id);
 export const getMeterReadings = (tenantId: string): Promise<MeterReadingsData> => api.fetchMeterReadings(tenantId);
+export const saveMeterReadings = (tenantId: string, readings: MeterReadingsData): Promise<void> => api.updateMeterReadings(tenantId, readings);
 export const getUtilityRates = (): Promise<UtilityRates> => api.fetchUtilityRates();
-export const saveMeterReadings = (tenantId: string, readings: MeterReadingsData): Promise<void> => api.saveMeterReadings(tenantId, readings);
 
 // Employee Service Functions
-export const getEmployees = (): Promise<Employee[]> => api.fetchEmployees();
+export const getEmployees = (): Promise<Employee[]> => api.fetchActiveEmployees();
 export const getAllEmployees = (): Promise<Employee[]> => api.fetchAllEmployees();
-export const addEmployee = (employee: Omit<Employee, 'id' | 'status'>): Promise<Employee> => api.createEmployee(employee);
-export const updateEmployee = (id: string, employee: Omit<Employee, 'id' | 'status'>): Promise<Employee> => api.updateEmployee(id, employee);
-export const removeEmployee = (id: string): Promise<void> => api.removeEmployee(id);
+export const addEmployee = (data: Omit<Employee, 'id' | 'status'>): Promise<Employee> => api.createEmployee(data);
+export const updateEmployee = (id: string, data: Omit<Employee, 'id' | 'status'>): Promise<Employee> => api.updateEmployee(id, data);
+export const removeEmployee = (id: string): Promise<void> => api.deleteEmployee(id);
+export const getPayrollData = (year: number, month: number): Promise<{ period1: PayrollCalculationRow[], period2: PayrollCalculationRow[]}> => api.fetchPayrollDataForMonth(year, month);
+export const savePayrollData = (year: number, month: number, data: { period1: PayrollCalculationRow[], period2: PayrollCalculationRow[]}): Promise<void> => api.updatePayrollDataForMonth(year, month, data);
 
-// Payroll Service Functions
-export const getPayrollData = (year: number, month: number): Promise<{ period1: PayrollCalculationRow[], period2: PayrollCalculationRow[] }> => api.fetchPayrollDataForMonth(year, month);
-export const savePayrollData = (year: number, month: number, data: { period1: PayrollCalculationRow[], period2: PayrollCalculationRow[] }): Promise<void> => api.savePayrollDataForMonth(year, month, data);
+// Task Service Functions
+export const getTasks = async (): Promise<Task[]> => {
+    const tasks = await api.fetchTasks();
+    const employees = await api.fetchAllEmployees();
+    const rooms = await api.fetchRooms();
+
+    const employeeMap = new Map(employees.map(e => [e.id, e]));
+    const roomMap = new Map(rooms.map(r => [r.id, r]));
+
+    return tasks.map(t => ({
+        ...t,
+        assignee: t.assigneeId ? employeeMap.get(t.assigneeId) : undefined,
+        room: t.relatedRoomId ? roomMap.get(t.relatedRoomId) : undefined,
+    }));
+};
+export const addTask = (data: Omit<Task, 'id'>): Promise<Task> => api.createTask(data);
+export const updateTask = (id: string, data: Omit<Task, 'id'>): Promise<Task> => api.updateTask(id, data);
+export const removeTask = (id: string): Promise<void> => api.deleteTask(id);

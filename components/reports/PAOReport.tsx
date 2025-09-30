@@ -1,30 +1,77 @@
+
+
 import React, { useState, useMemo } from 'react';
 import { AdminBooking } from '../../types';
-import { FormSelect } from '../AdminPanel';
+import { formatISODate } from '../../services/utils';
 
-const PAOReport: React.FC<{ bookings: AdminBooking[] }> = ({ bookings }) => {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth();
+interface PAOReportProps {
+    bookings: AdminBooking[];
+    onGeneratePDF: (data: any) => void;
+}
 
-    const [year, setYear] = useState(currentYear);
-    const [month, setMonth] = useState(currentMonth);
+const FormInput: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label: string }> = ({ label, ...props }) => (
+    <div>
+        <label className="block text-sm font-medium text-text-muted mb-1">{label}</label>
+        <input className="w-full bg-secondary border border-border text-text-main px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent" {...props} />
+    </div>
+);
 
-    const yearOptions = Array.from({ length: 5 }, (_, i) => ({ value: (currentYear - i).toString(), label: (currentYear - i + 543).toString() }));
-    const monthOptions = Array.from({ length: 12 }, (_, i) => ({ value: i.toString(), label: new Date(0, i).toLocaleString('th-TH', { month: 'long' }) }));
+const getDefaultDateRange = (bookings: AdminBooking[]) => {
+    const relevantBookings = bookings.filter(b => b.status !== 'ยกเลิก' && b.status !== 'จอง');
+    if (relevantBookings.length === 0) {
+        const date = new Date();
+        const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        return {
+            firstDay: formatISODate(firstDay),
+            lastDay: formatISODate(lastDay),
+        };
+    }
 
-    const reportData = useMemo(() => {
-        return bookings
-            .filter(b => {
-                const checkInDate = new Date(b.checkIn);
-                return checkInDate.getFullYear() === year && checkInDate.getMonth() === month && b.status !== 'ยกเลิก' && b.status !== 'จอง';
-            })
-            .sort((a, b) => new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime());
-    }, [bookings, year, month]);
+    const dates = relevantBookings.map(b => b.checkIn);
+    const firstDay = dates.reduce((a, b) => a < b ? a : b, dates[0]);
+    const lastDay = dates.reduce((a, b) => a > b ? a : b, dates[0]);
+    
+    return { firstDay, lastDay };
+};
+
+const formatThaiDateFullYear = (isoDate: string) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    // Adjust for timezone to display correct date
+    const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+    const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
+    return adjustedDate.toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    });
+};
+
+const PAOReport: React.FC<PAOReportProps> = ({ bookings, onGeneratePDF }) => {
+    const initialDateRange = useMemo(() => getDefaultDateRange(bookings), [bookings]);
+    const [startDate, setStartDate] = useState(initialDateRange.firstDay);
+    const [endDate, setEndDate] = useState(initialDateRange.lastDay);
 
     const getDuration = (checkIn: string, checkOut: string) => {
         const duration = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000);
         return duration > 0 ? duration : 1;
     }
+
+    const reportData = useMemo(() => {
+        if (!startDate || !endDate) return [];
+        return bookings
+            .filter(b => {
+                const checkInDate = b.checkIn; // YYYY-MM-DD string
+                return checkInDate >= startDate && checkInDate <= endDate && b.status !== 'ยกเลิก' && b.status !== 'จอง';
+            })
+            .sort((a, b) => new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime())
+            .map(b => ({
+                ...b,
+                duration: getDuration(b.checkIn, b.checkOut)
+            }));
+    }, [bookings, startDate, endDate]);
+
 
     const totals = useMemo(() => {
         return reportData.reduce((acc, b) => {
@@ -34,50 +81,66 @@ const PAOReport: React.FC<{ bookings: AdminBooking[] }> = ({ bookings }) => {
         }, { totalAmount: 0, feeAmount: 0 });
     }, [reportData]);
     
+    const handleExport = () => {
+        const periodTitle = `ประจำวันที่ ${formatThaiDateFullYear(startDate)} ถึง ${formatThaiDateFullYear(endDate)}`;
+        onGeneratePDF({
+            periodTitle,
+            reportData,
+            totals
+        });
+    }
+
     return (
         <div>
-            <div className="bg-brand-primary p-6 rounded-lg shadow-lg">
+            <div className="bg-primary p-6 rounded-lg shadow-lg border border-border">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <FormSelect label="เลือกเดือน" value={month.toString()} onChange={e => setMonth(parseInt(e.target.value, 10))} options={monthOptions} />
-                    <FormSelect label="เลือกปี (พ.ศ.)" value={year.toString()} onChange={e => setYear(parseInt(e.target.value, 10))} options={yearOptions} />
+                    <FormInput label="ตั้งแต่วันที่" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                    <FormInput label="ถึงวันที่" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
                 </div>
 
                 <div className="text-center mb-4">
                     <h4 className="text-xl font-bold">บัญชีผู้เข้าพักและรายละเอียดในการเรียกเก็บค่าธรรมเนียมบำรุงองค์การบริหารส่วนจังหวัด</h4>
-                    <p className="text-sm text-brand-text">เจ้าของ/เจ้าสำนักโรงแรม วิพัฒน์โฮเทลดีเวลลอปเม้นท์จำกัด</p>
-                    <p className="text-sm text-brand-text">ประจำเดือน {monthOptions.find(m => m.value === month.toString())?.label} พ.ศ. {year + 543}</p>
+                    <p className="text-sm text-text-muted">เจ้าของ/เจ้าสำนักโรงแรม วิพัฒน์โฮเทลดีเวลลอปเม้นท์จำกัด</p>
+                    <p className="text-sm text-text-muted">ประจำวันที่ {formatThaiDateFullYear(startDate)} ถึง {formatThaiDateFullYear(endDate)}</p>
                 </div>
                 
-                <div className="">
+                <div className="overflow-x-auto">
                      <table className="w-full text-left text-sm whitespace-nowrap">
-                        <thead className="hidden md:table-header-group bg-brand-secondary">
+                        <thead className="bg-secondary">
                             <tr>
-                                <th className="p-2 text-xs uppercase text-brand-text tracking-wider">ที่</th>
-                                <th className="p-2 text-xs uppercase text-brand-text tracking-wider">ชื่อ-สกุล</th>
-                                <th className="p-2 text-xs uppercase text-brand-text tracking-wider">วันเวลาที่เข้าพัก</th>
-                                <th className="p-2 text-center text-xs uppercase text-brand-text tracking-wider">รวมจำนวนวัน</th>
-                                <th className="p-2 text-right text-xs uppercase text-brand-text tracking-wider">ราคาห้องพัก (บาท)</th>
-                                <th className="p-2 text-right text-xs uppercase text-brand-text tracking-wider">รวมค่าเช่า (บาท)</th>
-                                <th className="p-2 text-right text-xs uppercase text-brand-text tracking-wider">ค่าธรรมเนียม (บาท)</th>
+                                <th className="p-2 text-xs uppercase text-text-muted tracking-wider">ที่</th>
+                                <th className="p-2 text-xs uppercase text-text-muted tracking-wider">ชื่อ-สกุล</th>
+                                <th className="p-2 text-xs uppercase text-text-muted tracking-wider">วันเวลาที่เข้าพัก</th>
+                                <th className="p-2 text-center text-xs uppercase text-text-muted tracking-wider">รวมจำนวนวัน</th>
+                                <th className="p-2 text-right text-xs uppercase text-text-muted tracking-wider">ราคาห้องพัก (บาท)</th>
+                                <th className="p-2 text-right text-xs uppercase text-text-muted tracking-wider">รวมค่าเช่า (บาท)</th>
+                                <th className="p-2 text-right text-xs uppercase text-text-muted tracking-wider">ค่าธรรมเนียม (บาท)</th>
                             </tr>
                         </thead>
-                        <tbody className="block md:table-row-group">
-                            {reportData.map((b, index) => {
-                                const duration = getDuration(b.checkIn, b.checkOut);
-                                return (
-                                    <tr key={b.id} className="block p-3 mb-3 bg-brand-secondary rounded-lg md:table-row md:p-0 md:mb-0 md:bg-transparent md:border-b md:border-brand-primary">
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">ที่</span><span>{index + 1}</span></td>
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">ชื่อ-สกุล</span><span>{b.guest?.fullName}</span></td>
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2"><span className="font-semibold text-brand-text md:hidden">วันที่เข้าพัก</span><span>{new Date(b.checkIn).toLocaleDateString('th-TH')}</span></td>
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-center"><span className="font-semibold text-brand-text md:hidden">รวมวัน</span><span>{duration}</span></td>
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-right"><span className="font-semibold text-brand-text md:hidden">ราคาห้องพัก</span><span>{b.room?.price.toFixed(2)}</span></td>
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-right"><span className="font-semibold text-brand-text md:hidden">รวมค่าเช่า</span><span>{b.totalAmount.toFixed(2)}</span></td>
-                                        <td className="flex justify-between items-center py-1 md:table-cell md:p-2 md:text-right"><span className="font-semibold text-brand-text md:hidden">ค่าธรรมเนียม</span><span>{b.feeAmount.toFixed(2)}</span></td>
-                                    </tr>
-                                )
-                            })}
+                        <tbody>
+                             {reportData.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="text-center p-8 text-text-muted">
+                                        ไม่มีข้อมูลในช่วงวันที่ที่เลือก
+                                    </td>
+                                </tr>
+                            ) : (
+                                reportData.map((b, index) => {
+                                    return (
+                                        <tr key={b.id} className="border-b border-border">
+                                            <td className="p-2">{index + 1}</td>
+                                            <td className="p-2">{b.guest?.fullName}</td>
+                                            <td className="p-2">{new Date(b.checkIn).toLocaleDateString('th-TH')}</td>
+                                            <td className="p-2 text-center">{b.duration}</td>
+                                            <td className="p-2 text-right">{b.room?.price.toFixed(2)}</td>
+                                            <td className="p-2 text-right">{b.totalAmount.toFixed(2)}</td>
+                                            <td className="p-2 text-right">{b.feeAmount.toFixed(2)}</td>
+                                        </tr>
+                                    )
+                                })
+                            )}
                         </tbody>
-                        <tfoot className="hidden md:table-footer-group bg-brand-secondary font-bold">
+                        <tfoot className="bg-secondary font-bold">
                             <tr>
                                 <td colSpan={5} className="p-2 text-right">รวมทั้งสิ้น</td>
                                 <td className="p-2 text-right">{totals.totalAmount.toFixed(2)}</td>
@@ -85,14 +148,9 @@ const PAOReport: React.FC<{ bookings: AdminBooking[] }> = ({ bookings }) => {
                             </tr>
                         </tfoot>
                     </table>
-
-                    <div className="md:hidden mt-4 p-4 bg-brand-secondary rounded-lg font-bold text-sm">
-                        <div className="flex justify-between py-1"><span>รวมค่าเช่าทั้งสิ้น</span><span>{totals.totalAmount.toFixed(2)}</span></div>
-                        <div className="flex justify-between py-1 border-t border-brand-primary"><span>รวมค่าธรรมเนียม</span><span>{totals.feeAmount.toFixed(2)}</span></div>
-                    </div>
                 </div>
                  <div className="mt-6 text-right">
-                    <button className="bg-brand-accent text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90">
+                    <button onClick={handleExport} className="bg-accent text-white font-bold py-2 px-6 rounded-md hover:bg-opacity-90">
                         Export เป็น PDF
                     </button>
                 </div>
