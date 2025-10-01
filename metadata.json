@@ -1,22 +1,4 @@
 {
   "name": "Viphat Hotel Management Pro",
-  "short_name": "ViphatHotel",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#1F2937",
-  "theme_color": "#1F2937",
-  "description": "ระบบจัดการโรงแรมวิพัฒน์ จัดการห้องพัก การจอง และรายงาน",
-  "icons": [
-    {
-      "src": "https://placehold.co/192x192/1F2937/FFFFFF?text=VH",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://placehold.co/512x512/1F2937/FFFFFF?text=VH",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "requestFramePermissions": []
+  "description": "ระบบจัดการโรงแรมวิพัฒน์ จัดการห้องพัก การจอง และรายงาน"
 }
