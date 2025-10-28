@@ -1,15 +1,14 @@
-const CACHE = 'hotel-cache-v1';
+const CACHE = 'hotel-cache-v3';
 const ASSETS = [
-  '../', '../index.html',
+  '../',
+  '../index.html',
+  '../index.tsx',
   '../assets/styles.css',
-  '../assets/app.js',
-  '../assets/utils.js',
-  '../assets/ui.js',
-  '../assets/bookings.js',
-  '../assets/expenses.js',
-  '../assets/reports.js',
+  '../pwa/manifest.json',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+  'https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 

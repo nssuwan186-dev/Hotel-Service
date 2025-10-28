@@ -11,8 +11,39 @@
   <link rel="manifest" href="pwa/manifest.json">
   <link rel="stylesheet" href="assets/styles.css">
   <meta name="theme-color" content="#06b6d4">
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0"
+  }
+}
+</script>
 </head>
 <body class="bg-gray-800 text-gray-200">
+  <!-- Configuration Error Overlay -->
+  <div id="config-error-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-50 flex items-center justify-center p-8 hidden">
+    <div class="bg-gray-800 border border-red-500 rounded-lg p-8 max-w-lg text-center shadow-2xl">
+      <div class="text-5xl text-red-500 mb-4">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-white mb-2">ข้อผิดพลาดในการตั้งค่า</h2>
+      <p id="config-error-message" class="text-gray-300">
+        <!-- Error message will be inserted here by JS -->
+      </p>
+      <div class="mt-6 text-left bg-gray-900 p-4 rounded-md text-sm">
+        <p class="text-gray-400">กรุณาเปิดไฟล์ <code class="bg-gray-700 text-cyan-400 px-2 py-1 rounded">index.html</code> และแก้ไขส่วน <code class="bg-gray-700 text-cyan-400 px-2 py-1 rounded">window.CONFIG</code>:</p>
+        <pre class="text-yellow-300 mt-2 p-2 bg-black rounded overflow-x-auto"><code>
+  &lt;script&gt;
+    window.CONFIG = {
+      SCRIPT_URL: "YOUR_APPS_SCRIPT_URL_HERE",
+      // ...
+    };
+  &lt;/script&gt;
+        </code></pre>
+      </div>
+    </div>
+  </div>
+
   <div class="container mx-auto p-2 sm:p-4 md:p-8">
     <header class="text-center mb-6">
       <h1 class="text-3xl sm:text-4xl font-bold text-white">ระบบจัดการโรงแรม</h1>
@@ -164,6 +195,9 @@
             <button id="print-daily-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
               <i class="fa fa-print mr-2"></i>พิมพ์รายงานวันนี้
             </button>
+            <button id="ai-analysis-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded ml-2">
+              <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>วิเคราะห์ด้วย AI
+            </button>
           </div>
           <div id="report-summary" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6 mb-8">
             <div class="bg-gray-800 p-4 rounded-lg text-center"><h3 class="text-sm font-medium text-gray-300">เงินสด</h3><p id="report-total-cash" class="text-xl sm:text-2xl font-bold text-green-400">0.00</p></div>
@@ -183,6 +217,14 @@
               </tr></thead>
               <tbody id="report-table-body" class="divide-y divide-gray-700"></tbody>
             </table>
+          </div>
+          <div id="ai-analysis-container" class="mt-8 hidden">
+            <h3 class="text-lg sm:text-xl font-semibold mb-4 text-white">
+              <i class="fa-solid fa-robot mr-2 text-indigo-400"></i>สรุปและวิเคราะห์โดย AI
+            </h3>
+            <div id="ai-analysis-result" class="p-4 bg-gray-800 rounded-lg border border-gray-700 min-h-[100px] prose prose-invert max-w-none">
+              <!-- AI result goes here -->
+            </div>
           </div>
         </div>
 
@@ -349,19 +391,19 @@
   <!-- CONFIG -->
   <script>
     window.CONFIG = {
-      // เติม URL เว็บแอปของคุณ โดยแนบ token ใน query ด้วย
+      // !!! IMPORTANT: PLEASE REPLACE THIS URL WITH YOUR WEB APP URL !!!
+      // !!! สำคัญ: กรุณาเปลี่ยน URL นี้เป็น Web App URL ของคุณ !!!
       SCRIPT_URL: "YOUR_APPS_SCRIPT_WEBAPP_URL_HERE?token=YOUR_STATIC_API_TOKEN",
       API_TOKEN: "YOUR_STATIC_API_TOKEN"
     };
   </script>
 
-  <!-- JS -->
-  <script src="assets/utils.js"></script>
-  <script src="assets/ui.js"></script>
-  <script src="assets/bookings.js"></script>
-  <script src="assets/expenses.js"></script>
-  <script src="assets/reports.js"></script>
-  <script src="assets/app.js"></script>
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- App -->
+  <script type="module" src="index.tsx"></script>
+
   <script>
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('pwa/sw.js').catch(console.error); }
   </script>

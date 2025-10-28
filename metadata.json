@@ -1,4 +1,5 @@
 {
   "name": "Viphat Hotel Management Pro",
-  "description": "ระบบจัดการโรงแรมวิพัฒน์ จัดการห้องพัก การจอง และรายงาน"
+  "description": "ระบบจัดการโรงแรมวิพัฒน์ จัดการห้องพัก การจอง และรายงาน",
+  "requestFramePermissions": []
 }
