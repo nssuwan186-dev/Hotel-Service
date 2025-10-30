@@ -1,0 +1,30 @@
+[
+  {
+    "id": "A101",
+    "type": "Standard",
+    "price": 800,
+    "status": "ว่าง",
+    "tenant_id": ""
+  },
+  {
+    "id": "A102",
+    "type": "Standard",
+    "price": 800,
+    "status": "ไม่ว่าง",
+    "tenant_id": "MT01"
+  },
+  {
+    "id": "B201",
+    "type": "Standard Twin",
+    "price": 950,
+    "status": "ว่าง",
+    "tenant_id": ""
+  },
+  {
+    "id": "B202",
+    "type": "Standard Twin",
+    "price": 950,
+    "status": "ซ่อมบำรุง",
+    "tenant_id": ""
+  }
+]

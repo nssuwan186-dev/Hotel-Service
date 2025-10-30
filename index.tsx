@@ -54,7 +54,7 @@ const Utils = (() => {
   }
 
   async function apiGet(action) {
-    const url = `${(window as any).CONFIG.SCRIPT_URL}&action=${encodeURIComponent(action)}`;
+    const url = `${(window as any).CONFIG.SCRIPT_URL}?action=${encodeURIComponent(action)}`;
     const data = await safeFetch(url);
     if (data.status && data.status==='error') throw new Error(data.message || 'API error');
     return data.data || data.result || data;
@@ -534,7 +534,7 @@ const App = (() => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
-      const response = await fetch((window as any).CONFIG.SCRIPT_URL + '&action=ping', { signal: controller.signal });
+      const response = await fetch((window as any).CONFIG.SCRIPT_URL + '?action=ping', { signal: controller.signal });
       clearTimeout(timeoutId);
       
       if (response.ok) {
@@ -554,78 +554,7 @@ const App = (() => {
   }
 
   async function analyzeDailyReportWithAI() {
-    const aiContainer = Utils.qs('ai-analysis-container');
-    const aiResult = Utils.qs('ai-analysis-result');
-    // FIX: Cast element to HTMLButtonElement to access disabled property.
-    const btn = Utils.qs('ai-analysis-btn') as HTMLButtonElement;
-    
-    Utils.show(aiContainer);
-    aiResult.innerHTML = `<div class="flex items-center justify-center p-4"><div class="spinner"></div><p class="ml-4">AI กำลังวิเคราะห์ข้อมูล...</p></div>`;
-    btn.disabled = true;
-
-    try {
-        if (!process.env.API_KEY) {
-            throw new Error("API key is not configured.");
-        }
-        
-        const date = (Utils.qs('report-date-filter') as HTMLInputElement).value || new Date().toISOString().slice(0, 10);
-        const acts = (UI.getState().activities || []).filter(a => (a['Check-in Date'] || '').slice(0, 10) === date);
-        const exps = (UI.getState().expenses || []).filter(e => e.Date === date);
-
-        const totalIncome = acts.reduce((s, a) => s + (parseFloat(a['Cash Amount']) || 0) + (parseFloat(a['Transfer Amount']) || 0), 0);
-        const totalExpense = exps.reduce((s, e) => s + (parseFloat(e.Amount) || 0), 0);
-        const totalCash = acts.reduce((s, a) => s + (parseFloat(a['Cash Amount']) || 0), 0);
-        const totalTransfer = acts.reduce((s, a) => s + (parseFloat(a['Transfer Amount']) || 0), 0);
-        const netBalance = totalIncome - totalExpense;
-
-        const dailyData = {
-            date: new Date(date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }),
-            totalIncome,
-            totalExpense,
-            netBalance,
-            totalCash,
-            totalTransfer,
-            checkIns: acts.map(a => ({ guest: a['Guest Name'], room: a['Room Number'], price: a['Total Price'] })),
-            expenses: exps.map(e => ({ description: e.Description, amount: e.Amount })),
-        };
-        
-        if (dailyData.checkIns.length === 0 && dailyData.expenses.length === 0) {
-            aiResult.innerHTML = `<p class="text-gray-400 p-4 text-center">ไม่มีข้อมูลเพียงพอสำหรับวิเคราะห์ในวันนี้</p>`;
-            btn.disabled = false;
-            return;
-        }
-        
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        
-        const prompt = `คุณคือผู้ช่วยผู้จัดการโรงแรมมืออาชีพ มีหน้าที่วิเคราะห์ข้อมูลสรุปรายวันและให้ข้อมูลเชิงลึกที่เป็นประโยชน์
-        
-        นี่คือข้อมูลสำหรับวันที่ ${dailyData.date}:
-        - รายรับรวม: ${dailyData.totalIncome.toFixed(2)} บาท (เงินสด: ${dailyData.totalCash.toFixed(2)}, เงินโอน: ${dailyData.totalTransfer.toFixed(2)})
-        - รายจ่ายรวม: ${dailyData.totalExpense.toFixed(2)} บาท
-        - คงเหลือสุทธิ: ${dailyData.netBalance.toFixed(2)} บาท
-        - รายการเช็คอิน (${dailyData.checkIns.length} รายการ): ${JSON.stringify(dailyData.checkIns).substring(0, 500)}
-        - รายการรายจ่าย (${dailyData.expenses.length} รายการ): ${JSON.stringify(dailyData.expenses).substring(0, 500)}
-
-        โปรดสรุปผลประกอบการของวันนี้เป็นภาษาไทย โดยเน้นประเด็นต่อไปนี้:
-        1.  ภาพรวมทางการเงิน (รายรับ, รายจ่าย, และกำไร/ขาดทุน)
-        2.  กิจกรรมหลักที่เกิดขึ้น (เช่น จำนวนการเช็คอิน)
-        3.  ข้อสังเกตที่น่าสนใจ หรือคำแนะนำสำหรับผู้จัดการ (ถ้ามี)
-        
-        จัดรูปแบบคำตอบโดยใช้ Markdown เพื่อให้อ่านง่าย`;
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-
-        aiResult.innerHTML = marked.parse(response.text);
-
-    } catch (error) {
-        console.error("AI Analysis Error:", error);
-        aiResult.innerHTML = `<p class="text-red-400 p-4">เกิดข้อผิดพลาดในการวิเคราะห์ด้วย AI: ${error.message}</p>`;
-    } finally {
-        btn.disabled = false;
-    }
+    alert("ฟังก์ชันวิเคราะห์ด้วย AI ยังไม่พร้อมใช้งานในเวอร์ชันนี้ครับ");
   }
 
   function handleViewChange(viewId) {
@@ -794,6 +723,7 @@ const App = (() => {
 
   async function init(){
     UI.initTheme();
+    bindEventListeners(); // <-- MOVED HERE
     
     if ((window as any).CONFIG.SCRIPT_URL.includes("YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")) {
       const msg = "กรุณาตั้งค่า Google Apps Script URL ในไฟล์ index.html ก่อนใช้งาน";
@@ -810,7 +740,6 @@ const App = (() => {
     }
 
     // All clear, initialize the app fully
-    bindEventListeners();
     try{
       await fetchActivities(true);
       await Expenses.fetchAndRenderExpenses(true);

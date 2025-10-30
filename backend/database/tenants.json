@@ -1,0 +1,12 @@
+[
+  {
+    "id": "MT01",
+    "name": "คุณวิชัย แซ่ตั้ง",
+    "room_id": "A102",
+    "rent_amount": 3500,
+    "start_date": "2024-01-01",
+    "contact": "081-234-5678",
+    "prev_water_units": 100,
+    "prev_elec_units": 1000
+  }
+]
